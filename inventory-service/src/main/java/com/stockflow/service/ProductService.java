@@ -3,6 +3,7 @@ package com.stockflow.service;
 import com.stockflow.dto.PageResponseDto;
 import com.stockflow.dto.ProductResponseDto;
 import com.stockflow.entity.Product;
+import com.stockflow.exception.ProductNotFoundException;
 import com.stockflow.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +44,12 @@ public class ProductService {
                 productPage.getNumber(),
                 productPage.getSize()
         );
+    }
+
+    public ProductResponseDto findById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+        return toDto(product);
     }
 
     private ProductResponseDto toDto(Product product) {

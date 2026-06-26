@@ -6,7 +6,7 @@
 | ------ | ---------------------------------------- | ----------- | ---------- |
 | US-001 | Configuración del Modelo de Datos        | 3           | completada |
 | US-002 | Listar Productos con Paginación y Filtro | 2           | completada |
-| US-003 | Obtener Detalle de un Producto           | 1           | Pendiente  |
+| US-003 | Obtener Detalle de un Producto           | 1           | Completada |
 | US-004 | Registrar Movimiento de Inventario       | 3           | Pendiente  |
 | US-005 | Consultar Alertas de Stock               | 2           | Pendiente  |
 | US-006 | Historial de Movimientos por Producto    | 2           | Pendiente  |
@@ -104,12 +104,12 @@ Como usuario del sistema, quiero obtener el detalle de un producto específico p
 
 ### Criterios de Aceptación
 
-- [ ] Obtener producto por ID
-- [ ] Retornar 404 si producto no existe (ProductNotFoundException)
-- [ ] Mostrar información completa: id, sku, name, category, currentStock, minStock, unitPrice
-- [ ] Documentar endpoint con OpenAPI
-- [ ] Manejo global de excepciones con @RestControllerAdvice
-- [ ] Retornar ErrorResponse consistente: { timestamp, status, error, message, path }
+- [x] Obtener producto por ID
+- [x] Retornar 404 si producto no existe (ProductNotFoundException)
+- [x] Mostrar información completa: id, sku, name, category, currentStock, minStock, unitPrice
+- [x] Documentar endpoint con OpenAPI
+- [x] Manejo global de excepciones con @RestControllerAdvice
+- [x] Retornar ErrorResponse consistente: { timestamp, status, error, message, path }
 
 ### Estimación
 
