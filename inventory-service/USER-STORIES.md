@@ -2,14 +2,14 @@
 
 ## Historial de US
 
-| US     | Título                                   | Complejidad | Estado    |
-| ------ | ---------------------------------------- | ----------- | --------- |
-| US-001 | Configuración del Modelo de Datos        | 3           | Pendiente |
-| US-002 | Listar Productos con Paginación y Filtro | 2           | Pendiente |
-| US-003 | Obtener Detalle de un Producto           | 1           | Pendiente |
-| US-004 | Registrar Movimiento de Inventario       | 3           | Pendiente |
-| US-005 | Consultar Alertas de Stock               | 2           | Pendiente |
-| US-006 | Historial de Movimientos por Producto    | 2           | Pendiente |
+| US     | Título                                   | Complejidad | Estado     |
+| ------ | ---------------------------------------- | ----------- | ---------- |
+| US-001 | Configuración del Modelo de Datos        | 3           | completada |
+| US-002 | Listar Productos con Paginación y Filtro | 2           | completada |
+| US-003 | Obtener Detalle de un Producto           | 1           | Pendiente  |
+| US-004 | Registrar Movimiento de Inventario       | 3           | Pendiente  |
+| US-005 | Consultar Alertas de Stock               | 2           | Pendiente  |
+| US-006 | Historial de Movimientos por Producto    | 2           | Pendiente  |
 
 ---
 
@@ -21,13 +21,13 @@ Como desarrollador, quiero configurar el modelo de datos del sistema para establ
 
 ### Criterios de Aceptación
 
-- [ ] Definir entidad Product con campos: id, sku, name, category, currentStock, minStock, unitPrice
-- [ ] Definir entidad Movement con campos: id, productId, type[IN/OUT], quantity, reason, timestamp
-- [ ] Configurar relación uno a muchos entre Product y Movement
-- [ ] Implementar validaciones Bean Validation en DTOs (@NotNull, @NotBlank, @Min, @Max)
-- [ ] Configurar HikariCP con parámetros adecuados (maximum-pool-size, minimum-idle, connection-timeout, idle-timeout)
-- [ ] Crear datos iniciales mediante data.sql con mínimo 10 productos en al menos 3 categorías
-- [ ] Separar correctamente las capas: Controller -> Service -> Repository
+- [x] Definir entidad Product con campos: id, sku, name, category, currentStock, minStock, unitPrice
+- [x] Definir entidad Movement con campos: id, productId, type[IN/OUT], quantity, reason, timestamp
+- [x] Configurar relación uno a muchos entre Product y Movement
+- [x] Implementar validaciones Bean Validation en DTOs (@NotNull, @NotBlank, @Min, @Max)
+- [x] Configurar HikariCP con parámetros adecuados (maximum-pool-size, minimum-idle, connection-timeout, idle-timeout)
+- [x] Crear datos iniciales mediante data.sql con mínimo 10 productos en al menos 3 categorías
+- [x] Separar correctamente las capas: Controller -> Service -> Repository
 
 ### Estimación
 
@@ -63,12 +63,12 @@ Como usuario del sistema, quiero listar productos con paginación y filtro por c
 
 ### Criterios de Aceptación
 
-- [ ] Listar todos los productos con paginación
-- [ ] Filtrar productos por categoría
-- [ ] Soportar parámetros de página (page, size)
-- [ ] Retornar metadatos de paginación (totalElements, totalPages, currentPage)
-- [ ] Documentar endpoint con OpenAPI (@Operation, @ApiResponse, @Schema)
-- [ ] Exponer endpoint en /actuator/health, /actuator/metrics, /actuator/info
+- [x] Listar todos los productos con paginación
+- [x] Filtrar productos por categoría
+- [x] Soportar parámetros de página (page, size)
+- [x] Retornar metadatos de paginación (totalElements, totalPages, currentPage)
+- [x] Documentar endpoint con OpenAPI (@Operation, @ApiResponse, @Schema)
+- [x] Exponer endpoint en /actuator/health, /actuator/metrics, /actuator/info
 
 ### Estimación
 
