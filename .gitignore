@@ -1,0 +1,26 @@
+# Maven - compiled files
+inventory-service/target/
+*.jar
+*.war
+
+# IDE - Eclipse
+inventory-service/.classpath
+inventory-service/.project
+inventory-service/.settings/
+inventory-service/bin/
+
+# IDE - IntelliJ
+inventory-service/.idea/
+*.iml
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# H2 Database
+*.db
+*.trace.db
