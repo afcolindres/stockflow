@@ -5,7 +5,7 @@
 | US     | Título                                         | Complejidad | Estado    | Dependencias                          | Notes                                      |
 | ------ | ---------------------------------------------- | ----------- | --------- | ----------------------------------- | ----------------------------------------- |
 | US-001 | Configurar Signals para estado global          | 2           | Completado | -                                   | Base del estado global con signals             |
-| US-002 | Interceptor HTTP para errores                  | 1           | Pendiente | -                                   | Manejo centralizado de errores                |
+| US-002 | Interceptor HTTP para errores                  | 1           | Completado | -                                   | Manejo centralizado de errores                |
 | US-003 | Listado de productos con filtros y paginación  | 2           | Pendiente | US-001                               | Tabla con datos del API                    |
 | US-004 | Skeleton loaders durante peticiones            | 1           | Pendiente | US-003                               | UI de carga                             |
 | US-005 | Panel de alertas con severidad visual          | 2           | Pendiente | US-001                               | Lista de alertas del API                  |

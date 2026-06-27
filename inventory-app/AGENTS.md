@@ -113,6 +113,8 @@ Si necesitas modificar 3 o más archivos para estandarizar código, debes pedir 
 - **Mocks**: Angular TestBed
 - **Cobertura mínima**: 70%
 
+**IMPORTANTE: Antes de entregar, verificar que NO existen warnings ni errores de SonarLint.**
+
 ### Estructura de Tests
 
 ```
