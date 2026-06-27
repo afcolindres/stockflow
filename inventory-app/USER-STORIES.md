@@ -2,20 +2,20 @@
 
 ## Historial de US
 
-| US     | Título                                         | Complejidad | Estado    | Dependencias                          | Notes                                      |
-| ------ | ---------------------------------------------- | ----------- | --------- | ----------------------------------- | ----------------------------------------- |
-| US-001 | Configurar Signals para estado global          | 2           | Completado | -                                   | Base del estado global con signals             |
-| US-002 | Interceptor HTTP para errores                  | 1           | Completado | -                                   | Manejo centralizado de errores                |
-| US-003 | Listado de productos con filtros y paginación  | 2           | Completado | US-001                               | Tabla con datos del API                    |
-| US-004 | Skeleton loaders durante peticiones            | 1           | Pendiente | US-003                               | UI de carga                             |
-| US-005 | Panel de alertas con severidad visual          | 2           | Pendiente | US-001                               | Lista de alertas del API                  |
-| US-006 | Badge de estado de stock en tiempo real        | 1           | Pendiente | US-003                               | Columna en grid productos - Backend provee currentStock y minStock |
-| US-007 | Dashboard con KPIs derivados de signals        | 2           | Pendiente | US-001, US-003, US-005               | Requiere datos de productos y alertas      |
-| US-008 | Persistencia de filtros en localStorage        | 1           | Pendiente | US-001                               | effect() para persistencia               |
-| US-009 | Registro de movimiento con formulario reactivo | 2           | Pendiente | US-003                               | Modal desde grid productos + POST /api/v1/movements |
-| US-010 | Deshabilitar botón durante petición            | 1           | Pendiente | US-009                               | Botón "Registrar" del modal (US-009)           |
-| US-011 | Actualización de stock automática              | 2           | Pendiente | US-009                               | Después de registrar - actualiza signals       |
-| US-012 | Carga diferida de historial con @defer         | 2           | Pendiente | -                                   | @defer (on interaction)               |
+| US     | Título                                         | Complejidad | Estado     | Dependencias           | Notes                                                              |
+| ------ | ---------------------------------------------- | ----------- | ---------- | ---------------------- | ------------------------------------------------------------------ |
+| US-001 | Configurar Signals para estado global          | 2           | Completado | -                      | Base del estado global con signals                                 |
+| US-002 | Interceptor HTTP para errores                  | 1           | Completado | -                      | Manejo centralizado de errores                                     |
+| US-003 | Listado de productos con filtros y paginación  | 2           | Completado | US-001                 | Tabla con datos del API                                            |
+| US-004 | Skeleton loaders durante peticiones            | 1           | Completado | US-003                 | UI de carga                                                        |
+| US-005 | Panel de alertas con severidad visual          | 2           | Pendiente  | US-001                 | Lista de alertas del API                                           |
+| US-006 | Badge de estado de stock en tiempo real        | 1           | Pendiente  | US-003                 | Columna en grid productos - Backend provee currentStock y minStock |
+| US-007 | Dashboard con KPIs derivados de signals        | 2           | Pendiente  | US-001, US-003, US-005 | Requiere datos de productos y alertas                              |
+| US-008 | Persistencia de filtros en localStorage        | 1           | Pendiente  | US-001                 | effect() para persistencia                                         |
+| US-009 | Registro de movimiento con formulario reactivo | 2           | Pendiente  | US-003                 | Modal desde grid productos + POST /api/v1/movements                |
+| US-010 | Deshabilitar botón durante petición            | 1           | Pendiente  | US-009                 | Botón "Registrar" del modal (US-009)                               |
+| US-011 | Actualización de stock automática              | 2           | Pendiente  | US-009                 | Después de registrar - actualiza signals                           |
+| US-012 | Carga diferida de historial con @defer         | 2           | Pendiente  | -                      | @defer (on interaction)                                            |
 
 ---
 
@@ -56,11 +56,11 @@ Como desarrollador, quiero un interceptor para manejar errores HTTP globalmente.
 
 ### Criterios de Aceptación
 
-- [ ] Crear interceptor con HttpInterceptorFn
-- [ ] Parsear ErrorResponse del backend
-- [ ] Mostrar toast de error descriptivo
-- [ ] Manejar códigos 400, 404, 422, 500
-- [ ] Agregar data-test-id: `error-message`, `toast-error`
+- [x] Crear interceptor con HttpInterceptorFn
+- [x] Parsear ErrorResponse del backend
+- [x] Mostrar toast de error descriptivo
+- [x] Manejar códigos 400, 404, 422, 500
+- [x] Agregar data-test-id: `error-message`, `toast-error`
 
 ### Estimación
 
@@ -84,11 +84,11 @@ Como usuario, quiero ver un listado de productos con filtros por categoría y pa
 
 ### Criterios de Aceptación
 
-- [ ] Mostrar tabla de productos
-- [ ] Agregar filtro por categoría
-- [ ] Agregar paginación
-- [ ] Integrar con endpoint /api/v1/products
-- [ ] Agregar data-test-id: `product-list-table`, `product-list-filter-category`, `product-list-paginator`
+- [x] Mostrar tabla de productos
+- [x] Agregar filtro por categoría
+- [x] Agregar paginación
+- [x] Integrar con endpoint /api/v1/products
+- [x] Agregar data-test-id: `product-list-table`, `product-list-filter-category`, `product-list-paginator`
 
 ### Estimación
 
@@ -104,7 +104,34 @@ Como usuario, quiero ver un listado de productos con filtros por categoría y pa
 
 ---
 
-## US-004: Panel de alertas con severidad visual
+## US-004: Skeleton loaders durante peticiones
+
+### Descripción
+
+Como usuario, quiero ver skeleton loaders durante las peticiones HTTP.
+
+### Criterios de Aceptación
+
+- [x] Mostrar skeleton durante carga de productos
+- [ ] Mostrar skeleton durante carga de alertas
+- [x] Animación de shimmer
+- [x] Diseño consistente con UI
+- [x] Agregar data-test-id: `skeleton-loader`, `loading-spinner`
+
+### Estimación
+
+| Complejidad | 1 |
+| Tiempo estimado | 2 horas |
+
+### Tests Propuestos
+
+- [ ] Verificar que el skeleton se muestra durante la carga de productos
+- [ ] Verificar que el skeleton se muestra durante la carga de alertas
+- [ ] Verificar que la animación de shimmer funciona correctamente
+
+---
+
+## US-005: Panel de alertas con severidad visual
 
 ### Descripción
 
@@ -133,7 +160,7 @@ Como usuario, quiero ver el panel de alertas con indicador visual de severidad.
 
 ---
 
-## US-005: Badge de estado de stock en tiempo real
+## US-006: Badge de estado de stock en tiempo real
 
 ### Descripción
 
@@ -166,7 +193,7 @@ Como usuario, quiero ver el estado del stock visualizado con badges de colores.
 
 ---
 
-## US-006: Dashboard con KPIs derivados de signals
+## US-007: Dashboard con KPIs derivados de signals
 
 ### Descripción
 
@@ -202,7 +229,7 @@ Como usuario, quiero ver un dashboard con KPIs derivados automáticamente para m
 
 ---
 
-## US-007: Persistencia de filtros en localStorage
+## US-008: Persistencia de filtros en localStorage
 
 ### Descripción
 
@@ -228,33 +255,6 @@ Como usuario, quiero que los filtros se guarden en localStorage.
 
 ---
 
-## US-008: Skeleton loaders durante peticiones
-
-### Descripción
-
-Como usuario, quiero ver skeleton loaders durante las peticiones HTTP.
-
-### Criterios de Aceptación
-
-- [ ] Mostrar skeleton durante carga de productos
-- [ ] Mostrar skeleton durante carga de alertas
-- [ ] Animación de shimmer
-- [ ] Diseño consistente con UI
-- [ ] Agregar data-test-id: `skeleton-loader`, `loading-spinner`
-
-### Estimación
-
-| Complejidad | 1 |
-| Tiempo estimado | 2 horas |
-
-### Tests Propuestos
-
-- [ ] Verificar que el skeleton se muestra durante la carga de productos
-- [ ] Verificar que el skeleton se muestra durante la carga de alertas
-- [ ] Verificar que la animación de shimmer funciona correctamente
-
----
-
 ## US-009: Registro de movimiento con formulario reactivo
 
 ### Descripción
@@ -270,6 +270,7 @@ Como usuario, quiero registrar movimientos de inventario mediante un formulario 
 - [ ] Campo razón (text, obligatorio)
 - [ ] Validaciones en tiempo real
 - [ ] Mostrar alerta de error si el servicio retorna error (ej: stock insuficiente)
+- [ ] Recargar categorías después de registrar movimiento IN (para actualizar select de categorías)
 - [ ] Agregar data-test-id: `movement-form`, `movement-form-product`, `movement-form-type`, `movement-form-quantity`, `movement-form-reason`, `movement-form-submit`
 
 ### Estimación
