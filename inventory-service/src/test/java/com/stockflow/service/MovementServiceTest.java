@@ -17,10 +17,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -123,5 +130,41 @@ class MovementServiceTest {
 
         assertNotNull(result);
         assertEquals(0, product.getCurrentStock());
+    }
+
+    @Test
+    void getHistory_WithMovements_ReturnsHistory() {
+        Movement movement = new Movement(product, MovementType.OUT, 5, "Venta");
+        movement.setId(1L);
+        movement.setTimestamp(LocalDateTime.now());
+
+        Page<Movement> page = new PageImpl<>(List.of(movement));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(movementRepository.findByProductIdOrderByTimestampDesc(eq(1L), any(Pageable.class))).thenReturn(page);
+
+        List<MovementResponseDto> history = movementService.getHistory(1L, 0, 10);
+
+        assertNotNull(history);
+        assertEquals(1, history.size());
+        assertEquals(1L, history.get(0).getId());
+    }
+
+    @Test
+    void getHistory_ProductNotFoundThrowsException() {
+        when(productRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ProductNotFoundException.class, () -> movementService.getHistory(999L, 0, 10));
+    }
+
+    @Test
+    void getHistory_WithNoMovements_ReturnsEmptyList() {
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(movementRepository.findByProductIdOrderByTimestampDesc(eq(1L), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        List<MovementResponseDto> history = movementService.getHistory(1L, 0, 10);
+
+        assertNotNull(history);
+        assertTrue(history.isEmpty());
     }
 }

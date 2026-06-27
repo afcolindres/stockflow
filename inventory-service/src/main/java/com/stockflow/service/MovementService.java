@@ -9,13 +9,20 @@ import com.stockflow.exception.InsufficientStockException;
 import com.stockflow.exception.ProductNotFoundException;
 import com.stockflow.repository.MovementRepository;
 import com.stockflow.repository.ProductRepository;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MovementService {
@@ -55,6 +62,21 @@ public class MovementService {
                 product.getId(), product.getCurrentStock());
 
         return toDto(movement, product);
+    }
+
+    @RateLimiter(name = "movementHistory")
+    public List<MovementResponseDto> getHistory(Long productId, int page, int size) {
+        logger.info("Fetching movement history for productId={}, page={}, size={}", productId, page, size);
+
+        productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
+        Page<Movement> movementPage = movementRepository.findByProductIdOrderByTimestampDesc(productId, pageable);
+
+        return movementPage.getContent().stream()
+                .map(m -> toDto(m, m.getProduct()))
+                .collect(Collectors.toList());
     }
 
     private void validateStock(Product product, Integer quantity) {

@@ -9,7 +9,7 @@
 | US-003 | Obtener Detalle de un Producto           | 1           | Completada |
 | US-004 | Registrar Movimiento de Inventario       | 3           | Completada |
 | US-005 | Consultar Alertas de Stock               | 2           | Completada |
-| US-006 | Historial de Movimientos por Producto    | 2           | Pendiente  |
+| US-006 | Historial de Movimientos por Producto    | 2           | Completada |
 
 ---
 
@@ -234,12 +234,12 @@ Como usuario del sistema, quiero consultar el historial de movimientos de un pro
 
 ### Criterios de Aceptación
 
-- [ ] Consultar historial de movimientos por productId
-- [ ] Ordenar por timestamp descendente (más reciente primero)
-- [ ] Aplicar Rate Limiter de 10 peticiones por segundo
-- [ ] Soportar paginación en el historial
-- [ ] Documentar endpoint con OpenAPI
-- [ ] Configurar Rate Limiter en application.yml
+- [x] Consultar historial de movimientos por productId
+- [x] Ordenar por timestamp descendente (más reciente primero)
+- [x] Aplicar Rate Limiter de 10 peticiones por segundo
+- [x] Soportar paginación en el historial
+- [x] Documentar endpoint con OpenAPI
+- [x] Configurar Rate Limiter en application.yml
 
 ### Estimación
 
