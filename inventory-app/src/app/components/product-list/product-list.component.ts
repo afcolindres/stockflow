@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InventoryStore } from '../../services/inventory.store';
 import { IProduct } from '../../models/product.model';
+import { SkeletonLoaderComponent } from '../skeleton-loader/skeleton-loader.component';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SkeletonLoaderComponent],
   template: `
     <div class="product-list-container" data-test-id="product-list-container">
       <div class="product-list-header">
@@ -28,11 +29,7 @@ import { IProduct } from '../../models/product.model';
       </div>
 
       @if (store.loading$()) {
-        <div class="skeleton-loader" data-test-id="skeleton-loader">
-          @for (i of [1, 2, 3, 4, 5]; track i) {
-            <div class="skeleton-row"></div>
-          }
-        </div>
+        <app-skeleton-loader [rows]="5" rowHeight="48px" dataTestId="skeleton-loader"></app-skeleton-loader>
       } @else {
         <table class="product-table" data-test-id="product-list-table">
           <thead>
@@ -179,26 +176,6 @@ import { IProduct } from '../../models/product.model';
     .page-info {
       color: #666;
       font-size: 14px;
-    }
-    .skeleton-loader {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .skeleton-row {
-      height: 48px;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 4px;
-    }
-    @keyframes shimmer {
-      0% {
-        background-position: 200% 0;
-      }
-      100% {
-        background-position: -200% 0;
-      }
     }
   `]
 })
