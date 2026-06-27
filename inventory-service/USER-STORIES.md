@@ -7,7 +7,7 @@
 | US-001 | Configuración del Modelo de Datos        | 3           | completada |
 | US-002 | Listar Productos con Paginación y Filtro | 2           | completada |
 | US-003 | Obtener Detalle de un Producto           | 1           | Completada |
-| US-004 | Registrar Movimiento de Inventario       | 3           | Pendiente  |
+| US-004 | Registrar Movimiento de Inventario       | 3           | Completada |
 | US-005 | Consultar Alertas de Stock               | 2           | Pendiente  |
 | US-006 | Historial de Movimientos por Producto    | 2           | Pendiente  |
 
@@ -142,14 +142,14 @@ Como usuario del sistema, quiero registrar movimientos de inventario (entradas y
 
 ### Criterios de Aceptación
 
-- [ ] Registrar movimiento de entrada (IN) sumándole al stock
-- [ ] Registrar movimiento de salida (OUT) restándole al stock
-- [ ] Validar stock suficiente para salidas (InsufficientStockException código 422)
-- [ ] Actualizar automáticamente el currentStock del producto al registrar
+- [x] Registrar movimiento de entrada (IN) sumándole al stock
+- [x] Registrar movimiento de salida (OUT) restándole al stock
+- [x] Validar stock suficiente para salidas (InsufficientStockException código 422)
+- [x] Actualizar automáticamente el currentStock del producto al registrar
 - [ ] Disparar alerta si el stock cae por debajo del mínimo
-- [ ] Configurar Retry con máximo 3 intentos y espera exponencial
-- [ ] Documentar endpoint con OpenAPI
-- [ ] Validar DTOs con @Valid y anotaciones Bean Validation
+- [x] Configurar Retry con máximo 3 intentos y espera exponencial
+- [x] Documentar endpoint con OpenAPI
+- [x] Validar DTOs con @Valid y anotaciones Bean Validation
 
 ### Estimación
 
