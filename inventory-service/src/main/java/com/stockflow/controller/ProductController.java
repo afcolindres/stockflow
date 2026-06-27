@@ -6,6 +6,7 @@ import com.stockflow.dto.ProductResponseDto;
 import com.stockflow.service.ProductService;
 
 import java.util.List;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -78,5 +79,24 @@ public class ProductController {
     public ApiResponseWrapper<List<String>> getCategories() {
         List<String> categories = productService.findAllCategories();
         return new ApiResponseWrapper<>(200, "Obtención satisfactoria", categories);
+    }
+
+    @Operation(
+            summary = "Buscar productos",
+            description = "Retorna una lista de productos que coinciden con el texto de búsqueda"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Búsqueda exitosa")
+    })
+    @GetMapping("/products/search")
+    public ApiResponseWrapper<List<ProductResponseDto>> searchProducts(
+            @Parameter(description = "Texto de búsqueda", example = "laptop")
+            @RequestParam String q,
+
+            @Parameter(description = "Límite de resultados", example = "20")
+            @RequestParam(defaultValue = "20") int limit
+    ) {
+        List<ProductResponseDto> products = productService.search(q, limit);
+        return new ApiResponseWrapper<>(200, "Búsqueda satisfactoria", products);
     }
 }

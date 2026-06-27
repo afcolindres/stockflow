@@ -18,6 +18,7 @@ import { CommonModule } from '@angular/common';
         class="toast"
         [class.toast-success]="toastService.toast$().type === 'success'"
         [class.toast-error]="toastService.toast$().type === 'error'"
+        [class.toast-warning]="toastService.toast$().type === 'warning'"
         [attr.data-test-id]="'toast-notification'"
       >
         {{ toastService.toast$().message }}
@@ -52,6 +53,10 @@ import { CommonModule } from '@angular/common';
     }
     .toast-error {
       background: #dc3545;
+    }
+    .toast-warning {
+      background: #ffc107;
+      color: #333;
     }
     @keyframes slideIn {
       from {

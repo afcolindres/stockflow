@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
+
 @Service
 public class ProductService {
 
@@ -54,6 +56,14 @@ public class ProductService {
 
     public List<String> findAllCategories() {
         return productRepository.findAllCategories();
+    }
+
+    public List<ProductResponseDto> search(String query, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        List<Product> products = productRepository.searchByQuery(query, pageable);
+        return products.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     private ProductResponseDto toDto(Product product) {

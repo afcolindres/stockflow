@@ -104,16 +104,17 @@ export class InventoryStore {
         this.products.set(response.data.content);
         this.pagination.set({
           totalPages: response.data.totalPages,
-          totalElements: response.data.totalElements
+          totalElements: response.data.totalElements,
         });
-        this.filters.update(f => ({
+        this.filters.update((f) => ({
           ...f,
           page: response.data.currentPage,
-          size: response.data.size
+          size: response.data.size,
         }));
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error al cargar productos";
+      const message =
+        err instanceof Error ? err.message : "Error al cargar productos";
       this.error.set(message);
     } finally {
       this.loading.set(false);
@@ -133,7 +134,8 @@ export class InventoryStore {
         this.alerts.set([]);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error al cargar alertas";
+      const message =
+        err instanceof Error ? err.message : "Error al cargar alertas";
       this.error.set(message);
     } finally {
       this.loading.set(false);
@@ -142,7 +144,9 @@ export class InventoryStore {
 
   async loadCategories(): Promise<void> {
     try {
-      const response = await firstValueFrom(this.inventoryService.getCategories());
+      const response = await firstValueFrom(
+        this.inventoryService.getCategories(),
+      );
       if (response?.data) {
         this.categories.set(response.data.sort());
       }
@@ -165,6 +169,18 @@ export class InventoryStore {
           response.message || "Movimiento registrado",
           "success",
         );
+
+        if (response.data.alert && response.data.alert.productName) {
+          setTimeout(() => {
+            const alert = response.data.alert!;
+            this.toastService.show(
+              `Alerta: ${alert.productName} - Stock: ${alert.currentStock}/${alert.minStock}`,
+              "warning",
+              15000,
+            );
+          }, 1500);
+        }
+
         await this.loadProducts();
         await this.loadAlerts();
         await this.loadCategories();
@@ -173,7 +189,8 @@ export class InventoryStore {
 
       return false;
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error al registrar movimiento";
+      const message =
+        err instanceof Error ? err.message : "Error al registrar movimiento";
       this.error.set(message);
       return false;
     } finally {
@@ -183,6 +200,20 @@ export class InventoryStore {
 
   selectProduct(product: IProduct | null): void {
     this.selectedProduct.set(product);
+  }
+
+  async searchProducts(query: string, limit = 20): Promise<IProduct[]> {
+    try {
+      const response = await firstValueFrom(
+        this.inventoryService.searchProducts(query, limit),
+      );
+      if (response?.data) {
+        return response.data;
+      }
+      return [];
+    } catch {
+      return [];
+    }
   }
 
   clearError(): void {

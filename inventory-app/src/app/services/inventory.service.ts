@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { IProductResponse, IProductDetailResponse } from '../models/product.model';
+import { IProductResponse, IProductDetailResponse, IProductListResponse } from '../models/product.model';
 import { IMovementRequest, IMovementResponse, IMovementHistoryResponse } from '../models/movement.model';
 import { IAlertsResponse } from '../models/alert.model';
 
@@ -40,6 +40,14 @@ export class InventoryService {
 
   getCategories(): Observable<ICategoriesResponse> {
     return this.http.get<ICategoriesResponse>(`${this.baseUrl}/categories`);
+  }
+
+  searchProducts(query: string, limit = 20): Observable<IProductListResponse> {
+    let params = new HttpParams()
+      .set('q', query)
+      .set('limit', limit);
+
+    return this.http.get<IProductListResponse>(`${this.baseUrl}/products/search`, { params });
   }
 }
 

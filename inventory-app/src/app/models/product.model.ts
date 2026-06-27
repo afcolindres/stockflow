@@ -27,3 +27,9 @@ export interface IProductDetailResponse {
   message: string;
   data: IProduct;
 }
+
+export interface IProductListResponse {
+  statusCode: number;
+  message: string;
+  data: IProduct[];
+}

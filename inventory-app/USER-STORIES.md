@@ -10,9 +10,9 @@
 | US-004 | Skeleton loaders durante peticiones            | 1           | Completado | US-003                 | UI de carga                                                        |
 | US-005 | Panel de alertas con severidad visual          | 2           | Completado | US-001                 | Lista de alertas del API                                           |
 | US-006 | Badge de estado de stock en tiempo real        | 1           | Completado | US-003                 | Columna en grid productos - Backend provee currentStock y minStock |
-| US-007 | Dashboard con KPIs derivados de signals        | 2           | Completado  | US-001, US-003, US-005               | Requiere datos de productos y alertas                              |
+| US-007 | Dashboard con KPIs derivados de signals        | 2           | Completado | US-001, US-003, US-005 | Requiere datos de productos y alertas                              |
 | US-008 | Persistencia de filtros en localStorage        | 1           | Completado | US-001                 | effect() para persistencia                                         |
-| US-009 | Registro de movimiento con formulario reactivo | 2           | Pendiente  | US-003                 | Modal desde grid productos + POST /api/v1/movements                |
+| US-009 | Registro de movimiento con formulario reactivo | 2           | Completado | US-003                 | Modal desde grid productos + POST /api/v1/movements                |
 | US-010 | Deshabilitar botón durante petición            | 1           | Pendiente  | US-009                 | Botón "Registrar" del modal (US-009)                               |
 | US-011 | Actualización de stock automática              | 2           | Pendiente  | US-009                 | Después de registrar - actualiza signals                           |
 | US-012 | Carga diferida de historial con @defer         | 2           | Pendiente  | -                      | @defer (on interaction)                                            |
@@ -113,7 +113,7 @@ Como usuario, quiero ver skeleton loaders durante las peticiones HTTP.
 ### Criterios de Aceptación
 
 - [x] Mostrar skeleton durante carga de productos
-- [ ] Mostrar skeleton durante carga de alertas
+- [x] Mostrar skeleton durante carga de alertas
 - [x] Animación de shimmer
 - [x] Diseño consistente con UI
 - [x] Agregar data-test-id: `skeleton-loader`, `loading-spinner`
@@ -264,15 +264,15 @@ Como usuario, quiero registrar movimientos de inventario mediante un formulario 
 
 ### Criterios de Aceptación
 
-- [ ] Formulario con ReactiveFormsModule
-- [ ] Campo producto (select, obligatorio)
-- [ ] Campo tipo (IN/OUT, obligatorio)
-- [ ] Campo cantidad (number, > 0, obligatorio)
-- [ ] Campo razón (text, obligatorio)
-- [ ] Validaciones en tiempo real
-- [ ] Mostrar alerta de error si el servicio retorna error (ej: stock insuficiente)
-- [ ] Recargar categorías después de registrar movimiento IN (para actualizar select de categorías)
-- [ ] Agregar data-test-id: `movement-form`, `movement-form-product`, `movement-form-type`, `movement-form-quantity`, `movement-form-reason`, `movement-form-submit`
+- [x] Formulario con ReactiveFormsModule
+- [x] Campo producto (select, obligatorio)
+- [x] Campo tipo (IN/OUT, obligatorio)
+- [x] Campo cantidad (number, > 0, obligatorio)
+- [x] Campo razón (text, obligatorio)
+- [x] Validaciones en tiempo real
+- [x] Mostrar alerta de error si el servicio retorna error (ej: stock insuficiente)
+- [x] Recargar categorías después de registrar movimiento IN (para actualizar select de categorías)
+- [x] Agregar data-test-id: `movement-form`, `movement-form-product`, `movement-form-type`, `movement-form-quantity`, `movement-form-reason`, `movement-form-submit`
 
 ### Estimación
 
