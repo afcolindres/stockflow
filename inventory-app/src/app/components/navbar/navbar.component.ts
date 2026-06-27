@@ -13,8 +13,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       </div>
       <ul class="navbar-menu">
         <li>
-          <a routerLink="/home" routerLinkActive="active" data-test-id="nav-home">
-            Inicio
+          <a routerLink="/dashboard" routerLinkActive="active" data-test-id="nav-dashboard">
+            Dashboard
           </a>
         </li>
         <li>

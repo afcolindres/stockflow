@@ -3,12 +3,12 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'dashboard',
     pathMatch: 'full'
   },
   {
-    path: 'home',
-    loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent)
+    path: 'dashboard',
+    loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
     path: 'products',

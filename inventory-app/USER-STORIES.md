@@ -10,7 +10,7 @@
 | US-004 | Skeleton loaders durante peticiones            | 1           | Completado | US-003                 | UI de carga                                                        |
 | US-005 | Panel de alertas con severidad visual          | 2           | Completado | US-001                 | Lista de alertas del API                                           |
 | US-006 | Badge de estado de stock en tiempo real        | 1           | Completado | US-003                 | Columna en grid productos - Backend provee currentStock y minStock |
-| US-007 | Dashboard con KPIs derivados de signals        | 2           | Pendiente  | US-001, US-003, US-005 | Requiere datos de productos y alertas                              |
+| US-007 | Dashboard con KPIs derivados de signals        | 2           | Completado  | US-001, US-003, US-005               | Requiere datos de productos y alertas                              |
 | US-008 | Persistencia de filtros en localStorage        | 1           | Pendiente  | US-001                 | effect() para persistencia                                         |
 | US-009 | Registro de movimiento con formulario reactivo | 2           | Pendiente  | US-003                 | Modal desde grid productos + POST /api/v1/movements                |
 | US-010 | Deshabilitar botón durante petición            | 1           | Pendiente  | US-009                 | Botón "Registrar" del modal (US-009)                               |
@@ -197,15 +197,16 @@ Como usuario, quiero ver el estado del stock visualizado con badges de colores.
 
 ### Descripción
 
-Como usuario, quiero ver un dashboard con KPIs derivados automáticamente para monitorear el inventario en tiempo real.
+Como usuario, quiero ver un dashboard KPI cards mostrando: total de productos, alertas activas, alertas criticas y valor
+total de inventario derivados de computed signals derivados automáticamente para monitorear el inventario en tiempo real.
 
 ### Criterios de Aceptación
 
-- [ ] Mostrar total de productos (computed desde signals)
-- [ ] Mostrar alertas activas (computed desde signals)
-- [ ] Mostrar alertas críticas (computed desde signals)
-- [ ] Mostrar valor total del inventario (computed desde signals)
-- [ ] Agregar data-test-id a cada KPI: `dashboard-total-products`, `dashboard-total-alerts`, `dashboard-critical-alerts`, `dashboard-total-value`
+- [x] Mostrar total de productos (computed desde signals)
+- [x] Mostrar alertas activas (computed desde signals)
+- [x] Mostrar alertas críticas (computed desde signals)
+- [x] Mostrar valor total del inventario (computed desde signals)
+- [x] Agregar data-test-id a cada KPI: `dashboard-total-products`, `dashboard-total-alerts`, `dashboard-critical-alerts`, `dashboard-total-value`
 
 ### Estimación
 

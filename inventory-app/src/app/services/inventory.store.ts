@@ -41,7 +41,7 @@ export class InventoryStore {
   readonly pagination$ = this.pagination.asReadonly();
   readonly categories$ = this.categories.asReadonly();
 
-  readonly totalProducts = computed(() => this.products().length);
+  readonly totalProducts = computed(() => this.pagination().totalElements);
   readonly activeAlerts = computed(() => this.alerts().length);
   readonly criticalAlerts = computed(
     () => this.alerts().filter((a) => a.severity === "CRITICAL").length,

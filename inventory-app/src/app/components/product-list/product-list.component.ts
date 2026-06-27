@@ -51,7 +51,7 @@ import { SkeletonLoaderComponent } from '../skeleton-loader/skeleton-loader.comp
                 <td>{{ product.category }}</td>
                 <td>{{ product.currentStock }}</td>
                 <td>{{ product.minStock }}</td>
-                <td>\${{ product.unitPrice | number: '1.2-2' }}</td>
+                <td>L{{ product.unitPrice | number: '1.2-2' }}</td>
                 <td>
                   <span
                     [class]="getStockClass(product)"
