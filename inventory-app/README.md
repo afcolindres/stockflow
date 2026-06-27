@@ -6,10 +6,10 @@ SPA Angular 17+ para el monitoreo de inventario de productos en tiempo real. Est
 
 ## Autor
 
-**[Nombre del Desarrollador]**
+**[Arnold Francisco Colindres Bertrand]**
 
-- **Email:** [email@ejemplo.com]
-- **GitHub:** [github.com/usuario]
+- **Email:** [arnold_fcolindres@yahoo.com]
+- **GitHub:** [github.com/afcolindres]
 
 ## License
 
@@ -44,7 +44,7 @@ npm install
 3. **Iniciar el servidor de desarrollo**:
 
 ```bash
-npm start
+ng serve
 ```
 
 4. **Abrir en el navegador**:
@@ -55,12 +55,12 @@ http://localhost:4200
 
 ## Comandos Disponibles
 
-| Comando           | Descripción                            |
-| ---------------- | -------------------------------------- |
-| `npm start`     | Iniciar servidor de desarrollo       |
-| `npm run build` | Compilar el proyecto                 |
-| `npm test`      | Ejecutar tests unitarios              |
-| `npm run test -- --coverage` | Ejecutar tests con coverage |
+| Comando                      | Descripción                    |
+| ---------------------------- | ------------------------------ |
+| `npm start`                  | Iniciar servidor de desarrollo |
+| `npm run build`              | Compilar el proyecto           |
+| `npm test`                   | Ejecutar tests unitarios       |
+| `npm run test -- --coverage` | Ejecutar tests con coverage    |
 
 ## Estructura del Proyecto
 

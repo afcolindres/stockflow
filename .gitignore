@@ -24,3 +24,13 @@ Thumbs.db
 # H2 Database
 *.db
 *.trace.db
+
+# Angular (inventory-app)
+inventory-app/node_modules/
+inventory-app/.angular/
+inventory-app/dist/
+inventory-app/coverage/
+inventory-app/.env
+inventory-app/*.log
+inventory-app/.idea/
+inventory-app/*.iml

@@ -7,9 +7,13 @@ spring:
     username: sa
     password:
     hikari:
+      # Maximum pool size: 10 conexiones simultáneas - adecuado para carga media (~50-100 req/min)
       maximum-pool-size: 10
+      # Minimum idle: mantener 5 conexiones activas para evitar overhead de creación
       minimum-idle: 5
+      # Connection timeout: 30 segundos para obtener conexión del pool
       connection-timeout: 30000
+      # Idle timeout: cerrar conexiones inactivas después de 10 minutos
       idle-timeout: 600000
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
