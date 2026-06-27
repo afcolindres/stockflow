@@ -22,6 +22,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             Productos
           </a>
         </li>
+        <li>
+          <a routerLink="/alerts" routerLinkActive="active" data-test-id="nav-alerts">
+            Alertas
+          </a>
+        </li>
       </ul>
     </nav>
   `,

@@ -8,7 +8,7 @@
 | US-002 | Interceptor HTTP para errores                  | 1           | Completado | -                      | Manejo centralizado de errores                                     |
 | US-003 | Listado de productos con filtros y paginación  | 2           | Completado | US-001                 | Tabla con datos del API                                            |
 | US-004 | Skeleton loaders durante peticiones            | 1           | Completado | US-003                 | UI de carga                                                        |
-| US-005 | Panel de alertas con severidad visual          | 2           | Pendiente  | US-001                 | Lista de alertas del API                                           |
+| US-005 | Panel de alertas con severidad visual          | 2           | Completado | US-001                 | Lista de alertas del API                                           |
 | US-006 | Badge de estado de stock en tiempo real        | 1           | Pendiente  | US-003                 | Columna en grid productos - Backend provee currentStock y minStock |
 | US-007 | Dashboard con KPIs derivados de signals        | 2           | Pendiente  | US-001, US-003, US-005 | Requiere datos de productos y alertas                              |
 | US-008 | Persistencia de filtros en localStorage        | 1           | Pendiente  | US-001                 | effect() para persistencia                                         |
@@ -139,12 +139,12 @@ Como usuario, quiero ver el panel de alertas con indicador visual de severidad.
 
 ### Criterios de Aceptación
 
-- [ ] Listar productos con stock bajo el mínimo
-- [ ] Mostrar indicador visual diferenciado por color
-- [ ] Severity LOW en color naranja
-- [ ] Severity CRITICAL en color rojo
-- [ ] Integrar con endpoint /api/v1/alerts
-- [ ] Agregar data-test-id: `alerts-panel-list`, `alert-item-{productId}`, `alert-severity-{productId}`
+- [x] Listar productos con stock bajo el mínimo
+- [x] Mostrar indicador visual diferenciado por color
+- [x] Severity LOW en color naranja
+- [x] Severity CRITICAL en color rojo
+- [x] Integrar con endpoint /api/v1/alerts
+- [x] Agregar data-test-id: `alerts-panel-list`, `alert-item-{productId}`, `alert-severity-{productId}`
 
 ### Estimación
 
