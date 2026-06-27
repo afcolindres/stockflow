@@ -8,7 +8,7 @@
 | US-002 | Listar Productos con Paginación y Filtro | 2           | completada |
 | US-003 | Obtener Detalle de un Producto           | 1           | Completada |
 | US-004 | Registrar Movimiento de Inventario       | 3           | Completada |
-| US-005 | Consultar Alertas de Stock               | 2           | Pendiente  |
+| US-005 | Consultar Alertas de Stock               | 2           | Completada |
 | US-006 | Historial de Movimientos por Producto    | 2           | Pendiente  |
 
 ---
@@ -146,7 +146,6 @@ Como usuario del sistema, quiero registrar movimientos de inventario (entradas y
 - [x] Registrar movimiento de salida (OUT) restándole al stock
 - [x] Validar stock suficiente para salidas (InsufficientStockException código 422)
 - [x] Actualizar automáticamente el currentStock del producto al registrar
-- [ ] Disparar alerta si el stock cae por debajo del mínimo
 - [x] Configurar Retry con máximo 3 intentos y espera exponencial
 - [x] Documentar endpoint con OpenAPI
 - [x] Validar DTOs con @Valid y anotaciones Bean Validation
@@ -191,14 +190,14 @@ Como usuario del sistema, quiero consultar los productos con stock bajo el míni
 
 ### Criterios de Aceptación
 
-- [ ] Listar productos con currentStock <= minStock
-- [ ] Calcular severidad LOW si stock >= 50% del mínimo
-- [ ] Calcular severidad CRITICAL si stock < 50% del mínimo
-- [ ] Aplicar Circuit Breaker sobre el servicio de alertas
-- [ ] Implementar fallback que retorne lista vacía con mensaje descriptivo
-- [ ] Implementar Health Indicator personalizado (>20% productos en alerta crítica = DOWN)
-- [ ] Documentar endpoint con OpenAPI
-- [ ] Configurar Circuit Breaker en application.yml
+- [x] Listar productos con currentStock <= minStock
+- [x] Calcular severidad LOW si stock >= 50% del mínimo
+- [x] Calcular severidad CRITICAL si stock < 50% del mínimo
+- [x] Aplicar Circuit Breaker sobre el servicio de alertas
+- [x] Implementar fallback que retorne lista vacía con mensaje descriptivo
+- [x] Implementar Health Indicator personalizado (>20% productos en alerta crítica = DOWN)
+- [x] Documentar endpoint con OpenAPI
+- [x] Configurar Circuit Breaker en application.yml
 
 ### Estimación
 
