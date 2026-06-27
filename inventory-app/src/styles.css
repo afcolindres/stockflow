@@ -1,0 +1,49 @@
+/* Global Styles - inventory-app */
+
+:root {
+  --primary: #183473;
+  --primary-light: #3A63A7;
+  --primary-dark: #142B5B;
+  --secondary: #9c27b0;
+  --success: #2e7d32;
+  --warning: #F59020;
+  --danger: #E22827;
+  --info: #405BA7;
+
+  --bg: #ffffff;
+  --surface: #f5f5f5;
+  --text-primary: #1C1C1C;
+  --text-secondary: #474747;
+  --text-muted: #808080;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--primary-light);
+}
+
+button {
+  cursor: pointer;
+}
