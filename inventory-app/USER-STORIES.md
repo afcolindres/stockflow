@@ -306,10 +306,10 @@ Como usuario, quiero que el botón de registro se deshabilite durante la petici�
 
 ### Criterios de Aceptación
 
-- [ ] Deshabilitar botón "Registrar" mientras petición en vuelo
-- [ ] Mostrar indicador de carga
-- [ ] Habilitar después de respuesta
-- [ ] Agregar data-test-id: `movement-form-submit[disabled]`
+- [x] Deshabilitar botón "Registrar" mientras petición en vuelo
+- [x] Mostrar indicador de carga
+- [x] Habilitar después de respuesta
+- [x] Agregar data-test-id: `movement-form-submit[disabled]`
 
 ### Estimación
 

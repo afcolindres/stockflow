@@ -323,12 +323,7 @@ export class MovementFormComponent implements OnInit {
   private searchSubject = new Subject<string>();
 
   ngOnInit() {
-    this.form = this.fb.group({
-      productId: ['', Validators.required],
-      type: ['IN', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      reason: ['', Validators.required]
-    });
+    this.resetForm();
 
     this.searchSubject.pipe(
       debounceTime(300),
@@ -358,6 +353,18 @@ export class MovementFormComponent implements OnInit {
         this.showDropdown.set(false);
       }
     });
+  }
+
+  resetForm() {
+    this.form = this.fb.group({
+      productId: ['', Validators.required],
+      type: ['IN', Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      reason: ['', Validators.required]
+    });
+    this.selectedProduct.set(null);
+    this.searchControl.setValue('');
+    this.searchResults.set([]);
   }
 
   selectProduct(product: IProduct) {
@@ -394,10 +401,7 @@ export class MovementFormComponent implements OnInit {
   }
 
   onClose() {
-    this.form.reset({ type: 'IN', quantity: 1 });
-    this.selectedProduct.set(null);
-    this.searchControl.setValue('');
-    this.searchResults.set([]);
+    this.resetForm();
     this.close.emit();
   }
 }
