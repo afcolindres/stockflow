@@ -9,7 +9,7 @@
 | US-003 | Listado de productos con filtros y paginación  | 2           | Completado | US-001                 | Tabla con datos del API                                            |
 | US-004 | Skeleton loaders durante peticiones            | 1           | Completado | US-003                 | UI de carga                                                        |
 | US-005 | Panel de alertas con severidad visual          | 2           | Completado | US-001                 | Lista de alertas del API                                           |
-| US-006 | Badge de estado de stock en tiempo real        | 1           | Pendiente  | US-003                 | Columna en grid productos - Backend provee currentStock y minStock |
+| US-006 | Badge de estado de stock en tiempo real        | 1           | Completado | US-003                 | Columna en grid productos - Backend provee currentStock y minStock |
 | US-007 | Dashboard con KPIs derivados de signals        | 2           | Pendiente  | US-001, US-003, US-005 | Requiere datos de productos y alertas                              |
 | US-008 | Persistencia de filtros en localStorage        | 1           | Pendiente  | US-001                 | effect() para persistencia                                         |
 | US-009 | Registro de movimiento con formulario reactivo | 2           | Pendiente  | US-003                 | Modal desde grid productos + POST /api/v1/movements                |
@@ -168,11 +168,11 @@ Como usuario, quiero ver el estado del stock visualizado con badges de colores.
 
 ### Criterios de Aceptación
 
-- [ ] Badge OK: currentStock > minStock (verde)
-- [ ] Badge BAJO: currentStock <= minStock (naranja)
-- [ ] Badge CRÍTICO: currentStock <= minStock / 2 (rojo)
-- [ ] Cálculo en tiempo real
-- [ ] Agregar data-test-id: `product-stock-badge-{sku}`
+- [x] Badge OK: currentStock > minStock (verde)
+- [x] Badge BAJO: currentStock <= minStock (naranja)
+- [x] Badge CRÍTICO: currentStock <= minStock / 2 (rojo)
+- [x] Cálculo en tiempo real
+- [x] Agregar data-test-id: `product-stock-badge-{sku}`
 
 ### Estimación
 
