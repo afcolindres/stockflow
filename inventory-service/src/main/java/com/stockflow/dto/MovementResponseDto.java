@@ -13,6 +13,7 @@ public class MovementResponseDto {
     private Integer quantity;
     private String reason;
     private LocalDateTime timestamp;
+    private StockAlertResponseDto alert;
 
     public MovementResponseDto() {
     }
@@ -81,5 +82,13 @@ public class MovementResponseDto {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public StockAlertResponseDto getAlert() {
+        return alert;
+    }
+
+    public void setAlert(StockAlertResponseDto alert) {
+        this.alert = alert;
     }
 }

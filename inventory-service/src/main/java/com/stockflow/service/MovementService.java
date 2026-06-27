@@ -2,6 +2,8 @@ package com.stockflow.service;
 
 import com.stockflow.dto.MovementRequestDto;
 import com.stockflow.dto.MovementResponseDto;
+import com.stockflow.dto.StockAlertResponseDto;
+import com.stockflow.entity.AlertSeverity;
 import com.stockflow.entity.Movement;
 import com.stockflow.entity.MovementType;
 import com.stockflow.entity.Product;
@@ -55,13 +57,17 @@ public class MovementService {
 
         productRepository.save(product);
 
+        StockAlertResponseDto alert = checkAlert(product);
+
         Movement movement = new Movement(product, request.getType(), request.getQuantity(), request.getReason());
         movement = movementRepository.save(movement);
 
         logger.info("Movement registered successfully. New stock for product {}: {}",
                 product.getId(), product.getCurrentStock());
 
-        return toDto(movement, product);
+        MovementResponseDto response = toDto(movement, product);
+        response.setAlert(alert);
+        return response;
     }
 
     @RateLimiter(name = "movementHistory")
@@ -96,5 +102,32 @@ public class MovementService {
                 movement.getReason(),
                 movement.getTimestamp()
         );
+    }
+
+    private StockAlertResponseDto checkAlert(Product product) {
+        if (product.getCurrentStock() <= product.getMinStock()) {
+            AlertSeverity severity = calculateSeverity(product.getCurrentStock(), product.getMinStock());
+            logger.warn("ALERTA: Producto {} ({}) tiene stock bajo. Stock: {}/{}, Severidad: {}",
+                    product.getId(),
+                    product.getName(),
+                    product.getCurrentStock(),
+                    product.getMinStock(),
+                    severity);
+            return new StockAlertResponseDto(
+                    product.getId(),
+                    product.getName(),
+                    product.getCurrentStock(),
+                    product.getMinStock(),
+                    severity
+            );
+        }
+        return null;
+    }
+
+    private AlertSeverity calculateSeverity(Integer currentStock, Integer minStock) {
+        if (currentStock >= (minStock * 0.5)) {
+            return AlertSeverity.LOW;
+        }
+        return AlertSeverity.CRITICAL;
     }
 }

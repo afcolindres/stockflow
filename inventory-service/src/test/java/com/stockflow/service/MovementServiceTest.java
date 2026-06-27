@@ -2,6 +2,7 @@ package com.stockflow.service;
 
 import com.stockflow.dto.MovementRequestDto;
 import com.stockflow.dto.MovementResponseDto;
+import com.stockflow.entity.AlertSeverity;
 import com.stockflow.entity.Movement;
 import com.stockflow.entity.MovementType;
 import com.stockflow.entity.Product;
@@ -166,5 +167,62 @@ class MovementServiceTest {
 
         assertNotNull(history);
         assertTrue(history.isEmpty());
+    }
+
+    @Test
+    void registerMovement_OutputBelowMinStock_ReturnsAlert() {
+        product.setCurrentStock(10);
+        product.setMinStock(10);
+        MovementRequestDto request = new MovementRequestDto(1L, MovementType.OUT, 6, "Venta");
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(movementRepository.save(any(Movement.class))).thenAnswer(invocation -> {
+            Movement m = invocation.getArgument(0);
+            m.setId(1L);
+            return m;
+        });
+
+        MovementResponseDto result = movementService.registerMovement(request);
+
+        assertNotNull(result.getAlert());
+        assertEquals(AlertSeverity.CRITICAL, result.getAlert().getSeverity());
+        assertEquals(4, result.getAlert().getCurrentStock());
+    }
+
+    @Test
+    void registerMovement_InAboveMinStock_NoAlert() {
+        product.setCurrentStock(5);
+        product.setMinStock(10);
+        MovementRequestDto request = new MovementRequestDto(1L, MovementType.IN, 10, "Reposición");
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(movementRepository.save(any(Movement.class))).thenAnswer(invocation -> {
+            Movement m = invocation.getArgument(0);
+            m.setId(1L);
+            return m;
+        });
+
+        MovementResponseDto result = movementService.registerMovement(request);
+
+        assertNull(result.getAlert());
+    }
+
+    @Test
+    void registerMovement_InBelowMinStock_ReturnsAlert() {
+        product.setCurrentStock(2);
+        product.setMinStock(10);
+        MovementRequestDto request = new MovementRequestDto(1L, MovementType.IN, 5, "Reposición parcial");
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(movementRepository.save(any(Movement.class))).thenAnswer(invocation -> {
+            Movement m = invocation.getArgument(0);
+            m.setId(1L);
+            return m;
+        });
+
+        MovementResponseDto result = movementService.registerMovement(request);
+
+        assertNotNull(result.getAlert());
+        assertEquals(AlertSeverity.LOW, result.getAlert().getSeverity());
     }
 }
