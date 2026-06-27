@@ -149,6 +149,7 @@ Como usuario del sistema, quiero registrar movimientos de inventario (entradas y
 - [x] Configurar Retry con máximo 3 intentos y espera exponencial
 - [x] Documentar endpoint con OpenAPI
 - [x] Validar DTOs con @Valid y anotaciones Bean Validation
+- [x] Recargar categorías después de registrar movimiento (para actualizar select de categorías)
 
 ### Estimación
 

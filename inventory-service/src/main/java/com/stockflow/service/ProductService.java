@@ -52,6 +52,10 @@ public class ProductService {
         return toDto(product);
     }
 
+    public List<String> findAllCategories() {
+        return productRepository.findAllCategories();
+    }
+
     private ProductResponseDto toDto(Product product) {
         return new ProductResponseDto(
                 product.getId(),

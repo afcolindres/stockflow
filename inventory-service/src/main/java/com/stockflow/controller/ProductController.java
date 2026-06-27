@@ -4,6 +4,8 @@ import com.stockflow.dto.ApiResponseWrapper;
 import com.stockflow.dto.PageResponseDto;
 import com.stockflow.dto.ProductResponseDto;
 import com.stockflow.service.ProductService;
+
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -63,5 +65,18 @@ public class ProductController {
             @PathVariable Long id) {
         ProductResponseDto product = productService.findById(id);
         return new ApiResponseWrapper<>(200, "Obtención satisfactoria", product);
+    }
+
+    @Operation(
+            summary = "Listar categorías",
+            description = "Retorna todas las categorías disponibles"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de categorías obtenida exitosamente")
+    })
+    @GetMapping("/categories")
+    public ApiResponseWrapper<List<String>> getCategories() {
+        List<String> categories = productService.findAllCategories();
+        return new ApiResponseWrapper<>(200, "Obtención satisfactoria", categories);
     }
 }

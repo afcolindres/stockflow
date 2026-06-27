@@ -37,4 +37,14 @@ export class InventoryService {
   getMovementHistory(productId: number): Observable<IMovementHistoryResponse> {
     return this.http.get<IMovementHistoryResponse>(`${this.baseUrl}/movements/${productId}/history`);
   }
+
+  getCategories(): Observable<ICategoriesResponse> {
+    return this.http.get<ICategoriesResponse>(`${this.baseUrl}/categories`);
+  }
+}
+
+export interface ICategoriesResponse {
+  statusCode: number;
+  message: string;
+  data: string[];
 }

@@ -1,31 +1,70 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { ToastService } from './services/toast.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NavbarComponent, CommonModule],
   template: `
-    <div class="container">
-      <h1>inventory-app</h1>
-      <p>Hola Mundo - StockFlow</p>
+    <app-navbar></app-navbar>
+    <main class="main-content">
       <router-outlet></router-outlet>
-    </div>
+    </main>
+    @if (toastService.toast$().visible) {
+      <div
+        class="toast"
+        [class.toast-success]="toastService.toast$().type === 'success'"
+        [class.toast-error]="toastService.toast$().type === 'error'"
+        [attr.data-test-id]="'toast-notification'"
+      >
+        {{ toastService.toast$().message }}
+      </div>
+    }
   `,
   styles: [`
-    .container {
+    :host {
+      display: block;
+      min-height: 100vh;
       font-family: 'Poppins', sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      text-align: center;
     }
-    h1 {
-      color: #183473;
+    .main-content {
+      padding: 24px;
+      background: #f5f7fa;
+      min-height: calc(100vh - 60px);
     }
-    p {
-      color: #666;
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+    .toast-success {
+      background: #28a745;
+    }
+    .toast-error {
+      background: #dc3545;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
   `]
 })
-export class AppComponent {}
+export class AppComponent {
+  constructor(public toastService: ToastService) {}
+}

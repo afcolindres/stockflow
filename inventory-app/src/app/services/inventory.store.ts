@@ -29,12 +29,17 @@ export class InventoryStore {
     size: 10,
   });
 
+  private readonly pagination = signal({ totalPages: 0, totalElements: 0 });
+  private readonly categories = signal<string[]>([]);
+
   readonly products$ = this.products.asReadonly();
   readonly alerts$ = this.alerts.asReadonly();
   readonly selectedProduct$ = this.selectedProduct.asReadonly();
   readonly loading$ = this.loading.asReadonly();
   readonly error$ = this.error.asReadonly();
   readonly filters$ = this.filters.asReadonly();
+  readonly pagination$ = this.pagination.asReadonly();
+  readonly categories$ = this.categories.asReadonly();
 
   readonly totalProducts = computed(() => this.products().length);
   readonly activeAlerts = computed(() => this.alerts().length);
@@ -95,8 +100,17 @@ export class InventoryStore {
         ),
       );
 
-      if (response?.data) {
-        this.products.set(response.data);
+      if (response?.data?.content) {
+        this.products.set(response.data.content);
+        this.pagination.set({
+          totalPages: response.data.totalPages,
+          totalElements: response.data.totalElements
+        });
+        this.filters.update(f => ({
+          ...f,
+          page: response.data.currentPage,
+          size: response.data.size
+        }));
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Error al cargar productos";
@@ -115,12 +129,25 @@ export class InventoryStore {
 
       if (response?.data) {
         this.alerts.set(response.data);
+      } else {
+        this.alerts.set([]);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Error al cargar alertas";
       this.error.set(message);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async loadCategories(): Promise<void> {
+    try {
+      const response = await firstValueFrom(this.inventoryService.getCategories());
+      if (response?.data) {
+        this.categories.set(response.data.sort());
+      }
+    } catch {
+      this.categories.set([]);
     }
   }
 
@@ -140,6 +167,7 @@ export class InventoryStore {
         );
         await this.loadProducts();
         await this.loadAlerts();
+        await this.loadCategories();
         return true;
       }
 
