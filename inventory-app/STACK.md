@@ -349,6 +349,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 5. **inject()**: Para inyección de dependencias
 6. **localStorage**: Persistir filtros activos
 7. **Toast**: Notificaciones automáticas
+8. **firstValueFrom**: Usar en lugar de `.toPromise()` (deprecated en RxJS v7+)
+9. **readonly**: Todas las propiedades públicas de servicios y componentes deben ser `readonly`
+10. **err: unknown**: Usar en catch blocks con type guard (`instanceof Error`) para acceder propiedades
 
 ---
 

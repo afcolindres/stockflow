@@ -14,9 +14,5 @@ module.exports = {
     '^@env/(.*)$': '<rootDir>/src/environments/$1'
   },
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[tj]s?(x)'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  transform: {
-    '^.+\\.(ts|js|html)$': 'ts-jest'
-  },
-  transformIgnorePatterns: ['node_modules/(?!@angular)']
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx']
 };

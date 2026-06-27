@@ -4,7 +4,7 @@
 
 | US     | Título                                         | Complejidad | Estado    | Dependencias                          | Notes                                      |
 | ------ | ---------------------------------------------- | ----------- | --------- | ----------------------------------- | ----------------------------------------- |
-| US-001 | Configurar Signals para estado global          | 2           | Pendiente | -                                   | Base del estado global con signals             |
+| US-001 | Configurar Signals para estado global          | 2           | Completado | -                                   | Base del estado global con signals             |
 | US-002 | Interceptor HTTP para errores                  | 1           | Pendiente | -                                   | Manejo centralizado de errores                |
 | US-003 | Listado de productos con filtros y paginación  | 2           | Pendiente | US-001                               | Tabla con datos del API                    |
 | US-004 | Skeleton loaders durante peticiones            | 1           | Pendiente | US-003                               | UI de carga                             |
@@ -27,10 +27,10 @@ Como desarrollador, quiero configurar Signals para el estado global del inventar
 
 ### Criterios de Aceptación
 
-- [ ] Crear InventoryStore con @Injectable({ providedIn: 'root' })
-- [ ] Implementar signal() para: products, alerts, selectedProduct, loading, error
-- [ ] Implementar computed() para: totalProducts, criticalAlerts, totalValue
-- [ ] Implementar effect() para persistir filtros y mostrar toast de alertas
+- [x] Crear InventoryStore con @Injectable({ providedIn: 'root' })
+- [x] Implementar signal() para: products, alerts, selectedProduct, loading, error
+- [x] Implementar computed() para: totalProducts, criticalAlerts, totalValue
+- [x] Implementar effect() para persistir filtros y mostrar toast de alertas
 
 ### Estimación
 
@@ -39,12 +39,12 @@ Como desarrollador, quiero configurar Signals para el estado global del inventar
 
 ### Tests Propuestos
 
-- [ ] Verificar que InventoryStore se crea correctamente como servicio singleton
-- [ ] Verificar que signal() inicializa con valores por defecto
-- [ ] Verificar que computed() calcula totalProducts correctamente
-- [ ] Verificar que computed() calcula criticalAlerts correctamente
-- [ ] Verificar que computed() calcula totalValue correctamente
-- [ ] Verificar que effect() persiste filtros en localStorage
+- [x] Verificar que InventoryStore se crea correctamente como servicio singleton
+- [x] Verificar que signal() inicializa con valores por defecto
+- [x] Verificar que computed() calcula totalProducts correctamente
+- [x] Verificar que computed() calcula criticalAlerts correctamente
+- [x] Verificar que computed() calcula totalValue correctamente
+- [x] Verificar que effect() persiste filtros en localStorage
 
 ---
 
