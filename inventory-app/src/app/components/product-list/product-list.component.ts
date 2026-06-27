@@ -16,7 +16,7 @@ import { SkeletonLoaderComponent } from '../skeleton-loader/skeleton-loader.comp
         <div class="product-list-filters">
           <select
             class="filter-category"
-            data-test-id="product-list-filter-category"
+            data-test-id="filter-category"
             [(ngModel)]="selectedCategory"
             (change)="onCategoryChange()"
           >
@@ -65,7 +65,7 @@ import { SkeletonLoaderComponent } from '../skeleton-loader/skeleton-loader.comp
           </tbody>
         </table>
 
-        <div class="paginator" data-test-id="product-list-paginator">
+        <div class="paginator" data-test-id="filter-paginator">
           <button
             [disabled]="currentPage === 0"
             (click)="onPageChange(currentPage - 1)"

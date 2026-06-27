@@ -11,7 +11,7 @@
 | US-005 | Panel de alertas con severidad visual          | 2           | Completado | US-001                 | Lista de alertas del API                                           |
 | US-006 | Badge de estado de stock en tiempo real        | 1           | Completado | US-003                 | Columna en grid productos - Backend provee currentStock y minStock |
 | US-007 | Dashboard con KPIs derivados de signals        | 2           | Completado  | US-001, US-003, US-005               | Requiere datos de productos y alertas                              |
-| US-008 | Persistencia de filtros en localStorage        | 1           | Pendiente  | US-001                 | effect() para persistencia                                         |
+| US-008 | Persistencia de filtros en localStorage        | 1           | Completado | US-001                 | effect() para persistencia                                         |
 | US-009 | Registro de movimiento con formulario reactivo | 2           | Pendiente  | US-003                 | Modal desde grid productos + POST /api/v1/movements                |
 | US-010 | Deshabilitar botón durante petición            | 1           | Pendiente  | US-009                 | Botón "Registrar" del modal (US-009)                               |
 | US-011 | Actualización de stock automática              | 2           | Pendiente  | US-009                 | Después de registrar - actualiza signals                           |
@@ -238,10 +238,10 @@ Como usuario, quiero que los filtros se guarden en localStorage.
 
 ### Criterios de Aceptación
 
-- [ ] Usar effect() para persistir filtros
-- [ ] Recuperar filtros al cargar la página
-- [ ] Limpiar filtros cuando sea necesario
-- [ ] Agregar data-test-id: `filter-category`, `filter-paginator`
+- [x] Usar effect() para persistir filtros
+- [x] Recuperar filtros al cargar la página
+- [x] Limpiar filtros cuando sea necesario
+- [x] Agregar data-test-id: `filter-category`, `filter-paginator`
 
 ### Estimación
 
