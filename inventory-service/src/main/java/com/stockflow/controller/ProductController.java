@@ -3,6 +3,8 @@ package com.stockflow.controller;
 import com.stockflow.dto.ApiResponseWrapper;
 import com.stockflow.dto.PageResponseDto;
 import com.stockflow.dto.ProductResponseDto;
+import com.stockflow.dto.ProductStatsResponseDto;
+import com.stockflow.service.MovementService;
 import com.stockflow.service.ProductService;
 
 import java.util.List;
@@ -24,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
     private final ProductService productService;
+    private final MovementService movementService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, MovementService movementService) {
         this.productService = productService;
+        this.movementService = movementService;
     }
 
     @Operation(
@@ -98,5 +102,22 @@ public class ProductController {
     ) {
         List<ProductResponseDto> products = productService.search(q, limit);
         return new ApiResponseWrapper<>(200, "Búsqueda satisfactoria", products);
+    }
+
+    @Operation(
+            summary = "Obtener estadísticas avanzadas de producto",
+            description = "Retorna estadísticas avanzadas de un producto específico incluyendo total de movimientos, entradas, salidas, promedio mensual y último movimiento"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Estadísticas obtenidas exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
+    @GetMapping("/products/{id}/stats")
+    public ApiResponseWrapper<ProductStatsResponseDto> getProductStats(
+            @Parameter(description = "ID del producto", example = "1")
+            @PathVariable Long id
+    ) {
+        ProductStatsResponseDto stats = movementService.getStats(id);
+        return new ApiResponseWrapper<>(200, "Obtención satisfactoria", stats);
     }
 }

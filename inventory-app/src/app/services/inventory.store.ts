@@ -2,7 +2,7 @@ import { Injectable, signal, computed, effect, inject } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 import { IProduct } from "../models/product.model";
 import { IStockAlert } from "../models/alert.model";
-import { IMovementRequest } from "../models/movement.model";
+import { IMovementRequest, IMovement, IProductStats } from "../models/movement.model";
 import { InventoryService } from "./inventory.service";
 import { ToastService } from "./toast.service";
 
@@ -213,6 +213,52 @@ export class InventoryStore {
       return [];
     } catch {
       return [];
+    }
+  }
+
+  async getMovementHistory(productId: number, page = 0, size = 10): Promise<{ content: IMovement[]; totalPages: number; totalElements: number }> {
+    try {
+      const response = await firstValueFrom(
+        this.inventoryService.getMovementHistory(productId, page, size),
+      );
+      if (response?.data) {
+        return {
+          content: response.data.content || [],
+          totalPages: response.data.totalPages || 1,
+          totalElements: response.data.totalElements || response.data.content?.length || 0
+        };
+      }
+      return { content: [], totalPages: 0, totalElements: 0 };
+    } catch {
+      return { content: [], totalPages: 0, totalElements: 0 };
+    }
+  }
+
+  async getProductById(id: number): Promise<IProduct | null> {
+    try {
+      const response = await firstValueFrom(
+        this.inventoryService.getProductById(id),
+      );
+      if (response?.data) {
+        return response.data;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  async getProductStats(productId: number): Promise<IProductStats | null> {
+    try {
+      const response = await firstValueFrom(
+        this.inventoryService.getProductStats(productId),
+      );
+      if (response?.data) {
+        return response.data;
+      }
+      return null;
+    } catch {
+      return null;
     }
   }
 

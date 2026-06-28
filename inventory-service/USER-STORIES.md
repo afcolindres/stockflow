@@ -10,6 +10,7 @@
 | US-004 | Registrar Movimiento de Inventario       | 3           | Completada |
 | US-005 | Consultar Alertas de Stock               | 2           | Completada |
 | US-006 | Historial de Movimientos por Producto    | 2           | Completada |
+| US-007 | Estadísticas Avanzadas de Producto     | 2           | Completada |
 
 ---
 
@@ -239,6 +240,7 @@ Como usuario del sistema, quiero consultar el historial de movimientos de un pro
 - [x] Ordenar por timestamp descendente (más reciente primero)
 - [x] Aplicar Rate Limiter de 10 peticiones por segundo
 - [x] Soportar paginación en el historial
+- [x] Retornar PageResponseDto (totalElements, totalPages, currentPage, size)
 - [x] Documentar endpoint con OpenAPI
 - [x] Configurar Rate Limiter en application.yml
 
@@ -251,7 +253,7 @@ Como usuario del sistema, quiero consultar el historial de movimientos de un pro
 
 - [ ] Verificar consulta de historial por producto
 - [ ] Verificar ordenamiento descendente
-- [ ] Verificar Rate Limiter (bloquea após 10 req/s)
+- [ ] Verificar Rate Limiter (bloquea apos 10 req/s)
 - [ ] Verificar paginación del historial
 
 ### Notas Técnicas
@@ -264,6 +266,47 @@ Como usuario del sistema, quiero consultar el historial de movimientos de un pro
 ### Bloqueos
 
 Requiere US-004 completa (movimientos registrados)
+
+---
+
+## US-007: Estadísticas Avanzadas de Producto
+
+### Descripción
+
+Como usuario del sistema, quiero obtener estadísticas avanzadas de un producto específico sin depender del frontend, para analizar el comportamiento del inventario.
+
+### Criterios de Aceptación
+
+- [x] Nuevo endpoint GET /api/v1/products/{id}/stats
+- [x] Retornar totalMovements (total de movimientos)
+- [x] Retornar totalIn (total de entradas)
+- [x] Retornar totalOut (total de salidas)
+- [x] Retornar averagePerMonth (promedio mensual de movimientos)
+- [x] Retornar lastMovement (fecha del último movimiento)
+- [x] Documentar endpoint con OpenAPI
+- [x] Calcular promedio mensual basado en rango de fechas del historial
+
+### Estimación
+
+| Complejidad | 2 |
+| Tiempo estimado | 2 horas |
+
+### Ideas de Test
+
+- [ ] Verificar que el endpoint retorna todas las estadísticas
+- [ ] Verificar cálculo correcto de totalIn y totalOut
+- [ ] Verificar cálculo correcto de averagePerMonth
+- [ ] Verificar que retorna 404 si producto no existe
+
+### Notas Técnicas
+
+- Endpoint: GET `/api/v1/products/{id}/stats`
+- DTO: `ProductStatsResponseDto`
+- Servicio: `com.stockflow.service.MovementService.getStats()`
+
+### Dependencias
+
+Requiere US-006 completa (historial con paginación)
 
 ---
 

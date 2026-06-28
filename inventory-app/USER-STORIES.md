@@ -15,7 +15,8 @@
 | US-009 | Registro de movimiento con formulario reactivo | 2           | Completado | US-003                 | Modal desde grid productos + POST /api/v1/movements                |
 | US-010 | Deshabilitar botón durante petición            | 1           | Pendiente  | US-009                 | Botón "Registrar" del modal (US-009)                               |
 | US-011 | Actualización de stock automática              | 2           | Pendiente  | US-009                 | Después de registrar - actualiza signals                           |
-| US-012 | Carga diferida de historial con @defer         | 2           | Pendiente  | -                      | @defer (on interaction)                                            |
+| US-012 | Carga diferida de historial con @defer         | 2           | Completado | -                      | Página de detalle con @defer (on viewport/interaction)                         |
+| US-013 | Endpoint de estadísticas avanzadas        | 2           | Completado | US-012                 | Nuevo endpoint GET /products/{id}/stats - elimina cálculo en frontend          |
 
 ---
 
@@ -338,11 +339,11 @@ Como sistema, quiero actualizar el stock del producto al registrar un movimiento
 
 ### Criterios de Aceptación
 
-- [ ] Registrar movimiento vía API
-- [ ] Actualizar señal de productos automáticamente
-- [ ] Recargar alertas después del movimiento
-- [ ] Mostrar toast de éxito/error
-- [ ] Agregar data-test-id: `toast-notification`
+- [x] Registrar movimiento vía API
+- [x] Actualizar señal de productos automáticamente
+- [x] Recargar alertas después del movimiento
+- [x] Mostrar toast de éxito/error
+- [x] Agregar data-test-id: `toast-notification`
 
 ### Estimación
 
@@ -369,16 +370,23 @@ Como sistema, quiero actualizar el stock del producto al registrar un movimiento
 
 ### Descripción
 
-Como usuario, quiero que el historial de movimientos se cargue de forma diferida.
+Como usuario, quiero ver el detalle de un producto y su historial de movimientos en una página dedicada con carga diferida.
 
 ### Criterios de Aceptación
 
-- [ ] Usar @defer (on interaction) para historial
-- [ ] @placeholder con skeleton animado
-- [ ] @loading con spinner centrado
-- [ ] @error con mensaje amigable
-- [ ] Integrar con endpoint /api/v1/movements/{productId}/history
-- [ ] Agregar data-test-id: `movement-history-list`, `movement-history-loading`, `movement-history-error`
+- [x] Agregar columna de acción en grid de productos
+- [x] Mostrar icono de ojo en cada fila
+- [x] Al hacer click, navegar a página de detalle (/products/:id)
+- [x] Breadcrumb: Productos > Detalle
+- [x] Card con detalle del producto (consume /api/v1/products/{id})
+- [x] @defer (on viewport) para estadísticas avanzadas (al hacer scroll)
+- [x] @defer (on interaction) para historial de movimientos (al hacer click)
+- [x] @placeholder con skeleton animado
+- [x] @loading con spinner centrado
+- [x] @error con mensaje amigable
+- [x] Integrar con endpoint /api/v1/movements/{productId}/history
+- [x] Estadísticas avanzadas: total movimientos, entradas, salidas, último movimiento
+- [x] Agregar data-test-id: `product-detail-card`, `movement-history-list`, `movement-history-loading`, `movement-history-error`, `product-stats`, `product-stats-loading`, `product-stats-error`
 
 ### Estimación
 
@@ -387,14 +395,54 @@ Como usuario, quiero que el historial de movimientos se cargue de forma diferida
 
 ### Tests Propuestos
 
-- [ ] Verificar que el historial se carga con @defer al hacer interaction
+- [ ] Verificar que la columna de acción se muestra en el grid
+- [ ] Verificar que el icono de ojo es clickeable
+- [ ] Verificar que navega a página de detalle
+- [ ] Verificar que el breadcrumb muestra "Productos > Detalle"
+- [ ] Verificar que las estadísticas avanzadas se cargan con @defer (on viewport)
+- [ ] Verificar que el historial se carga con @defer (on interaction)
 - [ ] Verificar que el @placeholder muestra skeleton animado
 - [ ] Verificar que el @loading muestra spinner centrado
 - [ ] Verificar que el @error muestra mensaje amigable
-- [ ] Verificar que el historial se carga desde el endpoint /api/v1/movements/{productId}/history
 
 ### Notas
 
-- **Ubicación**: Se carga al hacer click/interaction en una fila del grid de productos (US-003)
-- **API**: GET /api/v1/movements/{productId}/history
-- **Carga diferida**: @defer (on interaction) - solo carga cuando el usuario interactúa
+- **Grid**: Se modifica el grid de productos (US-003)
+- **Ruta**: /products/:id (lazy-loaded)
+- **Detalle**: GET /api/v1/products/{id}
+- **Historial**: GET /api/v1/movements/{productId}/history
+- **Estadísticas**: @defer (on viewport) - se carga al hacer scroll
+- **Historial**: @defer (on interaction) - se carga al hacer click/interaction
+- **Estadísticas avanzadas**: Métricas calculadas desde el historial (total movimientos, entradas, salidas, último movimiento)
+
+---
+
+## US-013: Endpoint de Estadísticas Avanzadas
+
+### Descripción
+
+Como usuario del sistema, quiero obtener estadísticas avanzadas de un producto directamente del backend para eliminar el cálculo en el frontend.
+
+### Criterios de Aceptación
+
+- [x] Consumir nuevo endpoint GET /api/v1/products/{id}/stats
+- [x] Mostrar totalMovements, totalIn, totalOut, averagePerMonth, lastMovement
+- [x] Eliminar cálculo manual de estadísticas en product-detail.page.ts
+- [x] Agregar averagePerMonth a la interfaz de estadísticas
+
+### Estimación
+
+| Complejidad | 2 |
+| Tiempo estimado | 2 horas |
+
+### Tests Propuestos
+
+- [ ] Verificar que las estadísticas se cargan desde el nuevo endpoint
+- [ ] Verificar que averagePerMonth se muestra correctamente
+- [ ] Verificar que se elimina el código de cálculo manual
+
+### Notas
+
+- **Endpoint**: GET /api/v1/products/{id}/stats
+- **Anterior**: Se calculaba en frontend cargando 1000 movimientos
+- **Nuevo**: El backend calcula directamente desde la base de datos

@@ -21,6 +21,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: "products/:id",
+    loadComponent: () =>
+      import("./components/product-detail/product-detail.component").then(
+        (m) => m.ProductDetailPage,
+      ),
+  },
+  {
     path: "alerts",
     loadComponent: () =>
       import("./components/alerts-panel/alerts-panel.component").then(

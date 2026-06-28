@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { IProductResponse, IProductDetailResponse, IProductListResponse } from '../models/product.model';
-import { IMovementRequest, IMovementResponse, IMovementHistoryResponse } from '../models/movement.model';
+import { IMovementRequest, IMovementResponse, IMovementHistoryResponse, IProductStatsResponse } from '../models/movement.model';
 import { IAlertsResponse } from '../models/alert.model';
 
 @Injectable({ providedIn: 'root' })
@@ -34,8 +34,11 @@ export class InventoryService {
     return this.http.get<IAlertsResponse>(`${this.baseUrl}/alerts`);
   }
 
-  getMovementHistory(productId: number): Observable<IMovementHistoryResponse> {
-    return this.http.get<IMovementHistoryResponse>(`${this.baseUrl}/movements/${productId}/history`);
+  getMovementHistory(productId: number, page = 0, size = 10): Observable<IMovementHistoryResponse> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+    return this.http.get<IMovementHistoryResponse>(`${this.baseUrl}/movements/${productId}/history`, { params });
   }
 
   getCategories(): Observable<ICategoriesResponse> {
@@ -48,6 +51,10 @@ export class InventoryService {
       .set('limit', limit);
 
     return this.http.get<IProductListResponse>(`${this.baseUrl}/products/search`, { params });
+  }
+
+  getProductStats(productId: number): Observable<IProductStatsResponse> {
+    return this.http.get<IProductStatsResponse>(`${this.baseUrl}/products/${productId}/stats`);
   }
 }
 

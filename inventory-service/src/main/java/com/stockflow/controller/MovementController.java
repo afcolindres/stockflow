@@ -3,6 +3,7 @@ package com.stockflow.controller;
 import com.stockflow.dto.ApiResponseWrapper;
 import com.stockflow.dto.MovementRequestDto;
 import com.stockflow.dto.MovementResponseDto;
+import com.stockflow.dto.PageResponseDto;
 import com.stockflow.service.MovementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -68,7 +70,7 @@ public class MovementController {
 
     @Operation(
             summary = "Consultar historial de movimientos",
-            description = "Retorna el historial de movimientos de un producto específico ordenado por fecha descendente"
+            description = "Retorna el historial paginado de movimientos de un producto específico ordenado por fecha descendente"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Historial obtenido exitosamente"),
@@ -76,7 +78,7 @@ public class MovementController {
             @ApiResponse(responseCode = "429", description = "Too Many Requests - Rate limit excedido")
     })
     @GetMapping("/movements/{productId}/history")
-    public ApiResponseWrapper<List<MovementResponseDto>> getHistory(
+    public ApiResponseWrapper<PageResponseDto<MovementResponseDto>> getHistory(
             @Parameter(description = "ID del producto", example = "1")
             @PathVariable Long productId,
 
@@ -86,7 +88,8 @@ public class MovementController {
             @Parameter(description = "Tamaño de página", example = "10")
             @RequestParam(defaultValue = "10") int size
     ) {
-        List<MovementResponseDto> history = movementService.getHistory(productId, page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
+        PageResponseDto<MovementResponseDto> history = movementService.getHistory(productId, pageable);
         return new ApiResponseWrapper<>(200, "Obtención satisfactoria", history);
     }
 }

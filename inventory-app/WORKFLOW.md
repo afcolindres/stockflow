@@ -22,7 +22,7 @@ Antes de implementar, el agente revisará:
 | --------------------- | ------------------------------------------------ |
 | **ANALISIS.md**       | Requisitos, entidades y casos de uso del negocio |
 | **STACK.md**          | Stack técnico, tecnologías y herramientas        |
-| **USER-STORIES.md**   | Las 12 User Stories de Angular                   |
+| **USER-STORIES.md**   | Las 13 User Stories de Angular                   |
 | **inventory-service** | Endpoints del API disponibles                    |
 
 ### 3. Desarrollo
@@ -70,7 +70,7 @@ El agente entregara:
 | --------------- | ----------------------------------------------- |
 | ANALISIS.md     | Requisitos del sistema, entidades, casos de uso |
 | STACK.md        | Stack técnico (Angular 16+, Signals, @defer)    |
-| USER-STORIES.md | 12 User Stories de Angular                      |
+| USER-STORIES.md | 13 User Stories de Angular                      |
 
 ### Estructura del Proyecto
 
@@ -157,14 +157,15 @@ US-003 (Listado productos)
 ├─ US-010 (Deshabilitar botón)
 └─ US-011 (Stock automático)
 
+### Estadísticas
+
+US-012 (@defer history)
+└─ US-013 (Endpoint estadísticas avanzadas)
+
 ### UI
 
 US-003 (Listado productos)
 └─ US-004 (Skeleton loaders)
-
-### @defer
-
-US-012 (@defer history)
 
 ---
 

@@ -49,18 +49,18 @@ En `jest.config.js` (Jest):
 
 ```javascript
 module.exports = {
-  preset: 'jest-preset-angular',
-  setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
-  testPathIgnorePatterns: ['<rootDir>/node_modules/'],
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.spec.ts'],
+  preset: "jest-preset-angular",
+  setupFilesAfterEnv: ["<rootDir>/setup-jest.ts"],
+  testPathIgnorePatterns: ["<rootDir>/node_modules/"],
+  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.spec.ts"],
   coverageThreshold: {
     global: {
       branches: 70,
       functions: 70,
       lines: 70,
-      statements: 70
-    }
-  }
+      statements: 70,
+    },
+  },
 };
 ```
 
@@ -90,16 +90,16 @@ Tests requeridos:
 ### 3.1 Plantilla Base (Jasmine)
 
 ```typescript
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DashboardComponent } from './dashboard.component';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { DashboardComponent } from "./dashboard.component";
 
-describe('DashboardComponent', () => {
+describe("DashboardComponent", () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DashboardComponent]
+      imports: [DashboardComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);
@@ -107,7 +107,7 @@ describe('DashboardComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });
@@ -116,23 +116,23 @@ describe('DashboardComponent', () => {
 ### 3.2 Plantilla Base (Jest)
 
 ```typescript
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DashboardComponent } from './dashboard.component';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { DashboardComponent } from "./dashboard.component";
 
-describe('DashboardComponent', () => {
+describe("DashboardComponent", () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DashboardComponent]
+      imports: [DashboardComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });
@@ -140,15 +140,15 @@ describe('DashboardComponent', () => {
 
 ### 3.3 Funciones Comunes
 
-| Función                      | Descripción              |
-| ---------------------------- | ------------------------ |
+| Función                            | Descripción               |
+| ---------------------------------- | ------------------------- |
 | `TestBed.configureTestingModule()` | Configurar módulo de test |
-| `TestBed.createComponent()`    | Crear componente         |
-| `fixture.detectChanges()`      | Detectar cambios         |
-| `fixture.nativeElement`       | Elemento DOM             |
-| `component.signal()`          | Leer signal              |
-| `expect().toBeTruthy()`       | Verificar que existe    |
-| `expect().toEqual()`         | Verificar igualdad       |
+| `TestBed.createComponent()`        | Crear componente          |
+| `fixture.detectChanges()`          | Detectar cambios          |
+| `fixture.nativeElement`            | Elemento DOM              |
+| `component.signal()`               | Leer signal               |
+| `expect().toBeTruthy()`            | Verificar que existe      |
+| `expect().toEqual()`               | Verificar igualdad        |
 
 ---
 
@@ -157,31 +157,31 @@ describe('DashboardComponent', () => {
 ### 4.1 Test de Componente Standalone
 
 ```typescript
-it('should display total products from signal', () => {
+it("should display total products from signal", () => {
   store.products.set(mockProducts);
   fixture.detectChanges();
 
   const compiled = fixture.nativeElement as HTMLElement;
-  expect(compiled.querySelector('.total-products')).toContainText('15');
+  expect(compiled.querySelector(".total-products")).toContainText("15");
 });
 ```
 
 ### 4.2 Test de Servicio
 
 ```typescript
-it('should load products from API', () => {
+it("should load products from API", () => {
   httpClientSpy.get.and.returnValue(of(mockProducts));
 
   service.loadProducts();
 
-  expect(httpClientSpy.get).toHaveBeenCalledWith('/api/v1/products');
+  expect(httpClientSpy.get).toHaveBeenCalledWith("/api/v1/products");
 });
 ```
 
 ### 4.3 Test de Signal
 
 ```typescript
-it('should compute total value correctly', () => {
+it("should compute total value correctly", () => {
   const totalValue = store.totalValue();
   expect(totalValue).toBe(15000);
 });
@@ -190,7 +190,7 @@ it('should compute total value correctly', () => {
 ### 4.4 Test de @defer
 
 ```typescript
-it('should load history on interaction', (done) => {
+it("should load history on interaction", (done) => {
   component.productId = 1;
   component.onProductClick();
 
@@ -204,21 +204,27 @@ it('should load history on interaction', (done) => {
 ### 4.5 Test de Formulario Reactivo
 
 ```typescript
-it('should validate quantity field', () => {
+it("should validate quantity field", () => {
   component.form.setValue({ quantity: -1 });
-  expect(component.form.get('quantity')?.valid).toBeFalse();
+  expect(component.form.get("quantity")?.valid).toBeFalse();
 });
 ```
 
 ### 4.6 Test de Interceptor
 
 ```typescript
-it('should handle error response', () => {
-  const error = new HttpErrorResponse({ status: 422, error: { message: 'Stock insuficiente' } });
+it("should handle error response", () => {
+  const error = new HttpErrorResponse({
+    status: 422,
+    error: { message: "Stock insuficiente" },
+  });
 
-  interceptor.intercept({} as HttpRequest<any>, { handle: () => throwError(() => error) })
+  interceptor
+    .intercept({} as HttpRequest<any>, {
+      handle: () => throwError(() => error),
+    })
     .subscribe({
-      error: (err) => expect(err.status).toBe(422)
+      error: (err) => expect(err.status).toBe(422),
     });
 });
 ```
@@ -254,20 +260,21 @@ ng test --coverage --code-coverage
 
 ## 6. Tracking de Tests por US
 
-| US         | Título                            | Tests Creados | Ejecución | Estado    |
-| ---------- | -------------------------------- | -------------- | --------- | --------- |
-| US-ANG-001 | Configurar Signals para estado global | [ ]            | [ ]       | Pendiente |
-| US-ANG-002 | Dashboard con KPIs derivados        | [ ]            | [ ]       | Pendiente |
-| US-ANG-003 | Listado de productos               | [ ]            | [ ]       | Pendiente |
-| US-ANG-004 | Badge de estado de stock            | [ ]            | [ ]       | Pendiente |
-| US-ANG-005 | Panel de alertas                  | [ ]            | [ ]       | Pendiente |
-| US-ANG-006 | Registro de movimiento            | [ ]            | [ ]       | Pendiente |
-| US-ANG-007 | Actualización de stock            | [ ]            | [ ]       | Pendiente |
-| US-ANG-008 | Carga diferida de historial       | [ ]            | [ ]       | Pendiente |
-| US-ANG-009 | Persistencia de filtros          | [ ]            | [ ]       | Pendiente |
-| US-ANG-010 | Interceptor HTTP                | [ ]            | [ ]       | Pendiente |
-| US-ANG-011 | Skeleton loaders                 | [ ]            | [ ]       | Pendiente |
-| US-ANG-012 | Deshabilitar botón              | [ ]            | [ ]       | Pendiente |
+| US     | Título                                          | Tests Creados | Ejecución | Estado    |
+| ------ | ----------------------------------------------- | ------------- | --------- | --------- |
+| US-001 | Configurar Signals para estado global           | [ ]           | [ ]       | Pendiente |
+| US-002 | Interceptor HTTP para errores                | [ ]           | [ ]       | Pendiente |
+| US-003 | Listado de productos con filtros y paginación | [ ]           | [ ]       | Pendiente |
+| US-004 | Skeleton loaders durante peticiones         | [ ]           | [ ]       | Pendiente |
+| US-005 | Panel de alertas con severidad visual        | [ ]           | [ ]       | Pendiente |
+| US-006 | Badge de estado de stock en tiempo real  | [ ]           | [ ]       | Pendiente |
+| US-007 | Dashboard con KPIs derivados de signals   | [ ]           | [ ]       | Pendiente |
+| US-008 | Persistencia de filtros en localStorage  | [ ]           | [ ]       | Pendiente |
+| US-009 | Registro de movimiento con formulario reactivo | [ ]           | [ ]       | Pendiente |
+| US-010 | Deshabilitar botón durante petición      | [ ]           | [ ]       | Pendiente |
+| US-011 | Actualización de stock automática      | [ ]           | [ ]       | Pendiente |
+| US-012 | Carga diferida de historial con @defer   | [ ]           | [ ]       | Pendiente |
+| US-013 | Endpoint de estadísticas avanzadas     | [ ]           | [ ]       | Pendiente |
 
 ---
 
@@ -313,13 +320,13 @@ ng test --coverage --code-coverage
 
 ## 8. Troubleshooting
 
-| Problema                    | Solución                             |
-| --------------------------- | ------------------------------------ |
-| Tests fallan aleatoriamente | Revisar async/await                 |
-| No encuentra elemento       | Usar `fixture.detectChanges()`         |
-| Error de red                | Verificar mock de HttpClient          |
-| Timeout                    | Aumentar timeout en test            |
-| Signal no actualiza         | Usar `set()` o `update()`           |
+| Problema                    | Solución                       |
+| --------------------------- | ------------------------------ |
+| Tests fallan aleatoriamente | Revisar async/await            |
+| No encuentra elemento       | Usar `fixture.detectChanges()` |
+| Error de red                | Verificar mock de HttpClient   |
+| Timeout                     | Aumentar timeout en test       |
+| Signal no actualiza         | Usar `set()` o `update()`      |
 
 ---
 
@@ -327,8 +334,8 @@ ng test --coverage --code-coverage
 
 ### URL de Desarrollo
 
-- **Puerto**: 4200 (default) o 3001
-- **Ruta base**: `http://localhost:3001`
+- **Puerto**: 4200 (default) o 4200
+- **Ruta base**: `http://localhost:4200`
 
 ### Rutas Principales para Tests
 
@@ -338,12 +345,12 @@ ng test --coverage --code-coverage
 
 ### Endpoints Consumidos
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | /api/v1/products | Lista de productos con paginación |
-| GET | /api/v1/alerts | Lista de alertas de stock |
-| POST | /api/v1/movements | Registrar movimiento |
-| GET | /api/v1/movements/{productId}/history | Historial de movimientos |
+| Método | Endpoint                              | Descripción                       |
+| ------ | ------------------------------------- | --------------------------------- |
+| GET    | /api/v1/products                      | Lista de productos con paginación |
+| GET    | /api/v1/alerts                        | Lista de alertas de stock         |
+| POST   | /api/v1/movements                     | Registrar movimiento              |
+| GET    | /api/v1/movements/{productId}/history | Historial de movimientos          |
 
 ### Selectores Comunes del Proyecto
 
@@ -369,57 +376,57 @@ Los tests deben usar selectores `data-test-id` para mayor estabilidad y mantenib
 
 ```typescript
 // Dashboard
-'[data-test-id="dashboard-total-products"]'
-'[data-test-id="dashboard-total-alerts"]'
-'[data-test-id="dashboard-critical-alerts"]'
-'[data-test-id="dashboard-total-value"]'
+'[data-test-id="dashboard-total-products"]';
+'[data-test-id="dashboard-total-alerts"]';
+'[data-test-id="dashboard-critical-alerts"]';
+'[data-test-id="dashboard-total-value"]';
 
 // Product List
-'[data-test-id="product-list-table"]'
-'[data-test-id="product-list-filter-category"]'
-'[data-test-id="product-list-paginator"]'
-'[data-test-id="product-row-ELEC-001"]'
-'[data-test-id="product-stock-badge-ELEC-001"]'
+'[data-test-id="product-list-table"]';
+'[data-test-id="product-list-filter-category"]';
+'[data-test-id="product-list-paginator"]';
+'[data-test-id="product-row-ELEC-001"]';
+'[data-test-id="product-stock-badge-ELEC-001"]';
 
 // Alerts Panel
-'[data-test-id="alerts-panel-list"]'
-'[data-test-id="alert-item-ELEC-001"]'
-'[data-test-id="alert-severity-ELEC-001"]'
+'[data-test-id="alerts-panel-list"]';
+'[data-test-id="alert-item-ELEC-001"]';
+'[data-test-id="alert-severity-ELEC-001"]';
 
 // Movement Form
-'[data-test-id="movement-form"]'
-'[data-test-id="movement-form-product"]'
-'[data-test-id="movement-form-type"]'
-'[data-test-id="movement-form-quantity"]'
-'[data-test-id="movement-form-reason"]'
-'[data-test-id="movement-form-submit"]'
+'[data-test-id="movement-form"]';
+'[data-test-id="movement-form-product"]';
+'[data-test-id="movement-form-type"]';
+'[data-test-id="movement-form-quantity"]';
+'[data-test-id="movement-form-reason"]';
+'[data-test-id="movement-form-submit"]';
 
 // Navigation
-'[data-test-id="nav-dashboard"]'
-'[data-test-id="nav-products"]'
-'[data-test-id="nav-alerts"]'
-'[data-test-id="nav-movements"]'
+'[data-test-id="nav-dashboard"]';
+'[data-test-id="nav-products"]';
+'[data-test-id="nav-alerts"]';
+'[data-test-id="nav-movements"]';
 ```
 
 ### Ejemplo de Test con data-test-id
 
 ```typescript
-it('should display total products', () => {
+it("should display total products", () => {
   store.products.set(mockProducts);
   fixture.detectChanges();
 
   const element = fixture.nativeElement.querySelector(
-    '[data-test-id="dashboard-total-products"]'
+    '[data-test-id="dashboard-total-products"]',
   );
-  expect(element.textContent).toContain('15');
+  expect(element.textContent).toContain("15");
 });
 
-it('should submit movement form', () => {
+it("should submit movement form", () => {
   component.form.setValue({
     productId: 1,
-    type: 'OUT',
+    type: "OUT",
     quantity: 5,
-    reason: 'Venta realizada'
+    reason: "Venta realizada",
   });
 
   component.submit();

@@ -31,5 +31,27 @@ export interface IMovementResponse {
 export interface IMovementHistoryResponse {
   statusCode: number;
   message: string;
-  data: IMovement[];
+  data: {
+    content: IMovement[];
+    totalElements: number;
+    totalPages: number;
+    currentPage: number;
+    size: number;
+  };
+}
+
+export interface IProductStats {
+  productId: number;
+  productName: string;
+  totalMovements: number;
+  totalIn: number;
+  totalOut: number;
+  averagePerMonth: number;
+  lastMovement: string | null;
+}
+
+export interface IProductStatsResponse {
+  statusCode: number;
+  message: string;
+  data: IProductStats;
 }

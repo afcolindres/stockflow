@@ -2,6 +2,8 @@ package com.stockflow.service;
 
 import com.stockflow.dto.MovementRequestDto;
 import com.stockflow.dto.MovementResponseDto;
+import com.stockflow.dto.PageResponseDto;
+import com.stockflow.dto.ProductStatsResponseDto;
 import com.stockflow.dto.StockAlertResponseDto;
 import com.stockflow.entity.AlertSeverity;
 import com.stockflow.entity.Movement;
@@ -71,18 +73,66 @@ public class MovementService {
     }
 
     @RateLimiter(name = "movementHistory")
-    public List<MovementResponseDto> getHistory(Long productId, int page, int size) {
-        logger.info("Fetching movement history for productId={}, page={}, size={}", productId, page, size);
+    public PageResponseDto<MovementResponseDto> getHistory(Long productId, Pageable pageable) {
+        logger.info("Fetching movement history for productId={}, page={}, size={}", productId, pageable.getPageNumber(), pageable.getPageSize());
 
         productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
         Page<Movement> movementPage = movementRepository.findByProductIdOrderByTimestampDesc(productId, pageable);
 
-        return movementPage.getContent().stream()
+        List<MovementResponseDto> content = movementPage.getContent().stream()
                 .map(m -> toDto(m, m.getProduct()))
                 .collect(Collectors.toList());
+
+        return new PageResponseDto<>(
+                content,
+                movementPage.getTotalElements(),
+                movementPage.getTotalPages(),
+                movementPage.getNumber(),
+                movementPage.getSize()
+        );
+    }
+
+    public ProductStatsResponseDto getStats(Long productId) {
+        logger.info("Fetching stats for productId={}", productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId));
+
+        List<Movement> allMovements = movementRepository.findByProductIdOrderByTimestampDesc(
+                productId,
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "timestamp"))
+        ).getContent();
+
+        long totalIn = allMovements.stream()
+                .filter(m -> m.getType() == MovementType.IN)
+                .count();
+        long totalOut = allMovements.stream()
+                .filter(m -> m.getType() == MovementType.OUT)
+                .count();
+        long totalMovements = allMovements.size();
+        LocalDateTime lastMovement = allMovements.isEmpty() ? null : allMovements.get(0).getTimestamp();
+
+        double averagePerMonth = 0.0;
+        if (totalMovements > 0 && lastMovement != null) {
+            long months = java.time.temporal.ChronoUnit.MONTHS.between(
+                    allMovements.get(allMovements.size() - 1).getTimestamp(),
+                    lastMovement
+            );
+            months = Math.max(months, 1);
+            averagePerMonth = (double) totalMovements / months;
+        }
+
+        return new ProductStatsResponseDto(
+                product.getId(),
+                product.getName(),
+                totalMovements,
+                totalIn,
+                totalOut,
+                averagePerMonth,
+                lastMovement
+        );
     }
 
     private void validateStock(Product product, Integer quantity) {

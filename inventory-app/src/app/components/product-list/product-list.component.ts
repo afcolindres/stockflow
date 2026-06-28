@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
+import { Router, RouterModule } from "@angular/router";
 import { InventoryStore } from "../../services/inventory.store";
 import { IProduct } from "../../models/product.model";
 import { SkeletonLoaderComponent } from "../skeleton-loader/skeleton-loader.component";
@@ -12,6 +13,7 @@ import { MovementFormComponent } from "../movement-form/movement-form.component"
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     SkeletonLoaderComponent,
     MovementFormComponent,
   ],
@@ -60,6 +62,7 @@ import { MovementFormComponent } from "../movement-form/movement-form.component"
               <th>Stock Mín</th>
               <th>Precio</th>
               <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -78,6 +81,16 @@ import { MovementFormComponent } from "../movement-form/movement-form.component"
                   >
                     {{ getStockStatus(product) }}
                   </span>
+                </td>
+                <td>
+                  <button 
+                    class="btn-view-detail"
+                    (click)="openProductDetail(product)"
+                    [attr.data-test-id]="'product-btn-detail-' + product.sku"
+                    title="Ver detalle"
+                  >
+                    👁
+                  </button>
                 </td>
               </tr>
             }
@@ -221,11 +234,26 @@ import { MovementFormComponent } from "../movement-form/movement-form.component"
         color: #666;
         font-size: 14px;
       }
+      .btn-view-detail {
+        background: none;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      .btn-view-detail:hover {
+        background: #183473;
+        color: white;
+        border-color: #183473;
+      }
     `,
   ],
 })
 export class ProductListComponent implements OnInit {
   store = inject(InventoryStore);
+  private router = inject(Router);
 
   selectedCategory = "";
   currentPage = 0;
@@ -268,5 +296,9 @@ export class ProductListComponent implements OnInit {
     if (product.currentStock <= product.minStock / 2)
       return "stock-badge stock-critical";
     return "stock-badge stock-low";
+  }
+
+  openProductDetail(product: IProduct) {
+    this.router.navigate(['/products', product.id]);
   }
 }
