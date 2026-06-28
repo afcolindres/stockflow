@@ -4,70 +4,95 @@ import { ToastService } from './toast.service';
 describe('ToastService', () => {
   let service: ToastService;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      providers: [ToastService],
-    }).compileComponents();
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ToastService]
+    });
 
     service = TestBed.inject(ToastService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  describe('show()', () => {
-    it('should set toast with default type info', () => {
-      service.show('Test message');
-      expect(service.toast$().message).toBe('Test message');
-      expect(service.toast$().type).toBe('info');
-      expect(service.toast$().visible).toBe(true);
-    });
-
-    it('should set toast with success type', () => {
-      service.show('Success message', 'success');
-      expect(service.toast$().type).toBe('success');
-    });
-
-    it('should set toast with error type', () => {
-      service.show('Error message', 'error');
-      expect(service.toast$().type).toBe('error');
-    });
-
-    it('should hide toast after default duration', (done) => {
-      service.show('Test message');
-      expect(service.toast$().visible).toBe(true);
-
-      setTimeout(() => {
-        expect(service.toast$().visible).toBe(false);
-        done();
-      }, 3100);
-    });
-
-    it('should hide toast after custom duration', (done) => {
-      service.show('Test message', 'info', 1000);
-      expect(service.toast$().visible).toBe(true);
-
-      setTimeout(() => {
-        expect(service.toast$().visible).toBe(false);
-        done();
-      }, 1100);
-    });
-  });
-
-  describe('hide()', () => {
-    it('should hide toast immediately', () => {
-      service.show('Test message');
-      expect(service.toast$().visible).toBe(true);
-
-      service.hide();
+  describe('initial state', () => {
+    it('should not be visible initially', () => {
       expect(service.toast$().visible).toBe(false);
     });
 
-    it('should clear message when hiding', () => {
-      service.show('Test message');
-      service.hide();
+    it('should have empty message initially', () => {
       expect(service.toast$().message).toBe('');
+    });
+
+    it('should have info type initially', () => {
+      expect(service.toast$().type).toBe('info');
+    });
+  });
+
+  describe('show', () => {
+    it('should set message and type', () => {
+      service.show('Test message', 'success');
+
+      expect(service.toast$().message).toBe('Test message');
+      expect(service.toast$().type).toBe('success');
+      expect(service.toast$().visible).toBe(true);
+    });
+
+    it('should default to info type', () => {
+      service.show('Test message');
+
+      expect(service.toast$().type).toBe('info');
+    });
+
+    it('should support error type', () => {
+      service.show('Error message', 'error');
+
+      expect(service.toast$().type).toBe('error');
+    });
+
+    it('should support warning type', () => {
+      service.show('Warning message', 'warning');
+
+      expect(service.toast$().type).toBe('warning');
+    });
+  });
+
+  describe('hide', () => {
+    it('should hide toast', () => {
+      service.show('Test message', 'success');
+      service.hide();
+
+      expect(service.toast$().visible).toBe(false);
+    });
+
+    it('should clear message on hide', () => {
+      service.show('Test message', 'success');
+      service.hide();
+
+      expect(service.toast$().message).toBe('');
+    });
+  });
+
+  describe('auto hide', () => {
+    it('should auto hide after default duration', async () => {
+      jest.useFakeTimers();
+      service.show('Test message');
+
+      expect(service.toast$().visible).toBe(true);
+
+      jest.advanceTimersByTime(10000);
+
+      expect(service.toast$().visible).toBe(false);
+      jest.useRealTimers();
+    });
+
+    it('should auto hide after custom duration', async () => {
+      jest.useFakeTimers();
+      service.show('Test message', 'success', 5000);
+
+      expect(service.toast$().visible).toBe(true);
+
+      jest.advanceTimersByTime(5000);
+
+      expect(service.toast$().visible).toBe(false);
+      jest.useRealTimers();
     });
   });
 });

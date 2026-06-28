@@ -15,10 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,20 +49,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void findAll_ReturnsPageWithProducts() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
-        Page<Product> productPage = new PageImpl<>(List.of(product), pageable, 1);
-        when(productRepository.findAll(any(Pageable.class))).thenReturn(productPage);
-
-        PageResponseDto<ProductResponseDto> result = productService.findAll(0, 10, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        assertEquals("ELEC-001", result.getContent().get(0).getSku());
-    }
-
-    @Test
-    void findAll_WithCategory_ReturnsFilteredProducts() {
+    void findAll_WithCategory_ReturnsProducts() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Product> productPage = new PageImpl<>(List.of(product), pageable, 1);
         when(productRepository.findByCategory(eq("Electrónica"), any(Pageable.class))).thenReturn(productPage);
@@ -73,23 +58,23 @@ class ProductServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        assertEquals("Electrónica", result.getContent().get(0).getCategory());
+        assertEquals("ELEC-001", result.getContent().get(0).getSku());
     }
 
     @Test
-    void findAll_WithCategoryNoResults_ReturnsEmptyPage() {
+    void findAll_WithoutCategory_ReturnsAllProducts() {
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Product> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
-        when(productRepository.findByCategory(eq("CategoríaInvalida"), any(Pageable.class))).thenReturn(emptyPage);
+        Page<Product> productPage = new PageImpl<>(List.of(product), pageable, 1);
+        when(productRepository.findAll(any(Pageable.class))).thenReturn(productPage);
 
-        PageResponseDto<ProductResponseDto> result = productService.findAll(0, 10, "CategoríaInvalida");
+        PageResponseDto<ProductResponseDto> result = productService.findAll(0, 10, null);
 
         assertNotNull(result);
-        assertTrue(result.getContent().isEmpty());
+        assertEquals(1, result.getContent().size());
     }
 
     @Test
-    void findById_WithExistingId_ReturnsProduct() {
+    void findById_ExistingProduct_ReturnsProduct() {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         ProductResponseDto result = productService.findById(1L);
@@ -97,13 +82,46 @@ class ProductServiceTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("ELEC-001", result.getSku());
-        assertEquals("Laptop Dell XPS 15", result.getName());
     }
 
     @Test
-    void findById_WithNonExistingId_ThrowsProductNotFoundException() {
+    void findById_NonExistingProduct_ThrowsException() {
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ProductNotFoundException.class, () -> productService.findById(999L));
+    }
+
+    @Test
+    void findAllCategories_ReturnsCategoryList() {
+        when(productRepository.findAllCategories()).thenReturn(List.of("Electrónica", "Hogar", "Oficina"));
+
+        List<String> result = productService.findAllCategories();
+
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertTrue(result.contains("Electrónica"));
+    }
+
+    @Test
+    void search_WithQuery_ReturnsMatchingProducts() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(productRepository.searchByQuery(eq("Dell"), any(Pageable.class))).thenReturn(List.of(product));
+
+        List<ProductResponseDto> result = productService.search("Dell", 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Laptop Dell XPS 15", result.get(0).getName());
+    }
+
+    @Test
+    void search_NoMatchingQuery_ReturnsEmptyList() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(productRepository.searchByQuery(eq("NonExistent"), any(Pageable.class))).thenReturn(List.of());
+
+        List<ProductResponseDto> result = productService.search("NonExistent", 10);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }

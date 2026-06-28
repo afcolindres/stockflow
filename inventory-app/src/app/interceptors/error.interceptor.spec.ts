@@ -1,90 +1,110 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpInterceptorFn, HttpClient, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { Observable, throwError } from 'rxjs';
-import { errorInterceptor } from './error.interceptor';
+import { HttpRequest, HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
+import { errorInterceptor } from './error.interceptor';
 
 describe('ErrorInterceptor', () => {
-  let httpTestingController: HttpTestingController;
-  let toastService: ToastService;
+  let toastServiceMock: any;
+  let next: jest.Mock;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
+  beforeEach(() => {
+    toastServiceMock = {
+      show: jest.fn(),
+    };
+
+    next = jest.fn().mockImplementation(() => {
+      throw new Error('Error');
+    });
+
+    TestBed.configureTestingModule({
       providers: [
-        { provide: ToastService, useValue: { show: jasmine.createSpy('show') } }
-      ]
-    }).compileComponents();
-
-    httpTestingController = TestBed.inject(HttpTestingController);
-    toastService = TestBed.inject(ToastService);
+        { provide: ToastService, useValue: toastServiceMock },
+      ],
+    });
   });
 
-  afterEach(() => {
-    httpTestingController.verify();
-  });
+  const createErrorResponse = (status: number, message: string, statusText: string = 'OK') => {
+    return new HttpErrorResponse({
+      status,
+      statusText,
+      error: { message },
+    });
+  };
 
-  it('should be created', () => {
-    expect(errorInterceptor).toBeTruthy();
-  });
+  describe('error handling by status code', () => {
+    it('should handle 400 Bad Request and show validation message', (done) => {
+      const errorResponse = createErrorResponse(400, 'Parámetros inválidos');
+      next.mockReturnValue(() => { throw errorResponse; });
 
-  describe('error handling', () => {
-    it('should handle 400 error with validation message', () => {
-      const req = new HttpRequest('GET', '/test');
-      const nextHandler = {
-        handle: (req: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
-          return new Observable(observer => {
-            observer.error(new HttpErrorResponse({
-              status: 400,
-              error: { message: 'Parámetros inválidos' }
-            }));
-          });
-        }
-      };
-
-      TestBed.inject(HttpClient).get('/test').subscribe({
-        error: () => {}
+      errorInterceptor(new HttpRequest('GET', '/api/test'), next).subscribe({
+        error: () => {
+          expect(toastServiceMock.show).toHaveBeenCalledWith('Parámetros inválidos', 'error');
+          done();
+        },
       });
-
-      const httpMock = TestBed.inject(HttpTestingController);
-      httpMock.expectOne('/test');
-
-      const mockReq = httpMock.match('/test')[0];
-      mockReq.flush({}, { status: 400, statusText: 'Bad Request' });
     });
 
-    it('should handle 404 error with not found message', () => {
-      const httpMock = TestBed.inject(HttpTestingController);
+    it('should handle 404 Not Found and show not found message', (done) => {
+      const errorResponse = createErrorResponse(404, 'Producto no encontrado');
+      next.mockReturnValue(() => { throw errorResponse; });
 
-      TestBed.inject(HttpClient).get('/test').subscribe({
-        error: () => {}
+      errorInterceptor(new HttpRequest('GET', '/api/test'), next).subscribe({
+        error: () => {
+          expect(toastServiceMock.show).toHaveBeenCalledWith('Producto no encontrado', 'error');
+          done();
+        },
       });
-
-      const mockReq = httpMock.expectOne('/test');
-      mockReq.flush({}, { status: 404, statusText: 'Not Found' });
     });
 
-    it('should handle 422 error with stock insufficient message', () => {
-      const httpMock = TestBed.inject(HttpTestingController);
+    it('should handle 422 Unprocessable Entity and show stock message', (done) => {
+      const errorResponse = createErrorResponse(422, 'Stock insuficiente');
+      next.mockReturnValue(() => { throw errorResponse; });
 
-      TestBed.inject(HttpClient).get('/test').subscribe({
-        error: () => {}
+      errorInterceptor(new HttpRequest('GET', '/api/test'), next).subscribe({
+        error: () => {
+          expect(toastServiceMock.show).toHaveBeenCalledWith('Stock insuficiente', 'error');
+          done();
+        },
       });
-
-      const mockReq = httpMock.expectOne('/test');
-      mockReq.flush({}, { status: 422, statusText: 'Unprocessable Entity' });
     });
 
-    it('should handle 500 error with internal server message', () => {
-      const httpMock = TestBed.inject(HttpTestingController);
+    it('should handle 500 Internal Server Error and show error message', (done) => {
+      const errorResponse = createErrorResponse(500, 'Error interno del servidor');
+      next.mockReturnValue(() => { throw errorResponse; });
 
-      TestBed.inject(HttpClient).get('/test').subscribe({
-        error: () => {}
+      errorInterceptor(new HttpRequest('GET', '/api/test'), next).subscribe({
+        error: () => {
+          expect(toastServiceMock.show).toHaveBeenCalledWith('Error interno del servidor', 'error');
+          done();
+        },
       });
+    });
 
-      const mockReq = httpMock.expectOne('/test');
-      mockReq.flush({}, { status: 500, statusText: 'Internal Server Error' });
+    it('should show default message when error has no message', (done) => {
+      const errorResponse = new HttpErrorResponse({
+        status: 500,
+        statusText: 'Internal Server Error',
+      });
+      next.mockReturnValue(() => { throw errorResponse; });
+
+      errorInterceptor(new HttpRequest('GET', '/api/test'), next).subscribe({
+        error: () => {
+          expect(toastServiceMock.show).toHaveBeenCalledWith('Error de conexión', 'error');
+          done();
+        },
+      });
+    });
+
+    it('should re-throw error after handling', (done) => {
+      const errorResponse = createErrorResponse(400, 'Test error');
+      next.mockReturnValue(() => { throw errorResponse; });
+
+      errorInterceptor(new HttpRequest('GET', '/api/test'), next).subscribe({
+        error: (err) => {
+          expect(err).toBe(errorResponse);
+          done();
+        },
+      });
     });
   });
 });

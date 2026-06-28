@@ -14,14 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class AlertControllerTest {
@@ -45,16 +42,15 @@ class AlertControllerTest {
         alertDto = new StockAlertResponseDto(
                 1L,
                 "Laptop Dell XPS 15",
+                3,
                 5,
-                10,
                 AlertSeverity.LOW
         );
     }
 
     @Test
-    void getAlerts_WithAlerts_ReturnsOk() throws Exception {
-        List<StockAlertResponseDto> alerts = Arrays.asList(alertDto);
-        when(alertService.getAlerts()).thenReturn(alerts);
+    void getAlerts_WithAlerts_ReturnsAlertList() throws Exception {
+        when(alertService.getAlerts()).thenReturn(List.of(alertDto));
 
         mockMvc.perform(get("/api/v1/alerts"))
                 .andExpect(status().isOk())
@@ -65,27 +61,30 @@ class AlertControllerTest {
 
     @Test
     void getAlerts_WithNoAlerts_ReturnsEmptyList() throws Exception {
-        when(alertService.getAlerts()).thenReturn(Collections.emptyList());
+        when(alertService.getAlerts()).thenReturn(List.of());
 
         mockMvc.perform(get("/api/v1/alerts"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCode").value(200))
+                .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 
     @Test
-    void getAlerts_CriticalSeverity_ReturnsCorrectData() throws Exception {
-        StockAlertResponseDto criticalAlert = new StockAlertResponseDto(
+    void getAlerts_WithMultipleAlerts_ReturnsAllAlerts() throws Exception {
+        StockAlertResponseDto alert2 = new StockAlertResponseDto(
                 2L,
-                "Mouse Logitech",
-                3,
-                10,
+                "Mouse",
+                1,
+                5,
                 AlertSeverity.CRITICAL
         );
-        when(alertService.getAlerts()).thenReturn(Arrays.asList(criticalAlert));
+        when(alertService.getAlerts()).thenReturn(List.of(alertDto, alert2));
 
         mockMvc.perform(get("/api/v1/alerts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].severity").value("CRITICAL"));
+                .andExpect(jsonPath("$.statusCode").value(200))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(2));
     }
 }

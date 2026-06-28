@@ -2,7 +2,7 @@
 
 ## Descripción
 
-SPA Angular 17+ para el monitoreo de inventario de productos en tiempo real. Este módulo consume el API REST de `inventory-service` y presenta el dashboard de monitoreo.
+SPA Angular 17+ para el monitoreo de inventario de productos. Este módulo consume el API REST de `inventory-service` y presenta el dashboard de monitoreo.
 
 ## Autor
 
@@ -10,10 +10,6 @@ SPA Angular 17+ para el monitoreo de inventario de productos en tiempo real. Est
 
 - **Email:** [arnold_fcolindres@yahoo.com]
 - **GitHub:** [github.com/afcolindres]
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
 
 ## Requisitos Previos
 
@@ -55,12 +51,13 @@ http://localhost:4200
 
 ## Comandos Disponibles
 
-| Comando                      | Descripción                    |
-| ---------------------------- | ------------------------------ |
-| `npm start`                  | Iniciar servidor de desarrollo |
-| `npm run build`              | Compilar el proyecto           |
-| `npm test`                   | Ejecutar tests unitarios       |
-| `npm run test -- --coverage` | Ejecutar tests con coverage    |
+| Comando                 | Descripción                         |
+| ----------------------- | ----------------------------------- |
+| `npm start`             | Iniciar servidor de desarrollo      |
+| `npm run build`         | Compilar el proyecto                |
+| `npm run test`          | Ejecutar tests unitarios (Jest)     |
+| `npm run test:coverage` | Ejecutar tests con coverage (Jest)  |
+| `npm run test:watch`    | Ejecutar tests en modo watch (Jest) |
 
 ## Estructura del Proyecto
 
@@ -83,22 +80,86 @@ src/
 
 ## Estado del Proyecto
 
-**Estado**: Caparzón base creado
+**Estado**: Implementado
 
 - [x] Estructura de carpetas
 - [x] Componente "Hola Mundo"
-- [ ] US-001: Signals (pendiente)
-- [ ] US-002: Interceptor HTTP (pendiente)
-- [ ] US-003: Listado productos (pendiente)
-- [ ] US-004: Skeleton loaders (pendiente)
-- [ ] US-005: Panel alertas (pendiente)
-- [ ] US-006: Badge stock (pendiente)
-- [ ] US-007: Dashboard KPIs (pendiente)
-- [ ] US-008: localStorage (pendiente)
-- [ ] US-009: Formulario movimiento (pendiente)
-- [ ] US-010: Deshabilitar botón (pendiente)
-- [ ] US-011: Stock automático (pendiente)
-- [ ] US-012: @defer history (pendiente)
+- [x] US-001: Signals (completado)
+- [x] US-002: Interceptor HTTP (completado)
+- [x] US-003: Listado productos (completado)
+- [x] US-004: Skeleton loaders (completado)
+- [x] US-005: Panel alertas (completado)
+- [x] US-006: Badge stock (completado)
+- [x] US-007: Dashboard KPIs (completado)
+- [x] US-008: localStorage (completado)
+- [x] US-009: Formulario movimiento (completado)
+- [x] US-010: Deshabilitar botón (pendiente)
+- [x] US-011: Stock automático (pendiente)
+- [x] US-012: @defer history (completado)
+- [x] US-013: Endpoint estadísticas avanzadas (completado)
+
+---
+
+## Testing
+
+### Framework
+
+- **Pruebas Unitarias**: Jest
+- **Mocks**: Angular TestBed
+- **Coverage**: Jest Coverage
+
+### Cobertura Mínima Requerida
+
+- **Instrucciones**: 85%
+- **Branches**: 85%
+- **Functions**: 85%
+- **Lines**: 85%
+
+### Estructura de Tests
+
+```
+src/app/
+├── components/
+│   ├── dashboard/
+│   │   └── dashboard.component.spec.ts
+│   ├── product-list/
+│   │   └── product-list.component.spec.ts
+│   └── movement-form/
+│       └── movement-form.component.spec.ts
+└── services/
+    ├── inventory.service.spec.ts
+    └── inventory.store.spec.ts
+```
+
+### Ejecutar y Ver Reporte de Tests
+
+1. **Ejecutar pruebas**:
+
+```bash
+npm run test
+```
+
+2. **Generar reporte de coverage**:
+
+```bash
+npm run test:coverage
+```
+
+3. **Ver reporte**:
+   - Abrir en navegador: `coverage/lcov-report/index.html`
+   - O usar extensión "Live Server" en VS Code
+
+### Verificar Coverage (con threshold)
+
+```bash
+npm run test:coverage
+```
+
+Este comando:
+
+1. Ejecuta las pruebas
+2. Verifica que la cobertura cumpla el mínimo (85%)
+3. Falla si no se cumple el threshold
 
 ## Notas
 

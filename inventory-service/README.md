@@ -2,9 +2,7 @@
 
 ## Descripción
 
-Aplicación web para el monitoreo de inventario de productos en tiempo real. Permite consultar el stock actual, recibir alertas cuando el inventario esté por debajo de los mínimos definidos y registrar movimientos (entradas y salidas) de mercancía.
-
-**Prueba Técnica - Banco Cuscatlan**
+API REST para el monitoreo de inventario de productos en tiempo real. Permite consultar el stock actual, recibir alertas cuando el inventario esté por debajo de los mínimos definidos y registrar movimientos (entradas y salidas) de mercancía.
 
 ---
 
@@ -168,24 +166,37 @@ El servicio arrancará en `http://localhost:8080`
 
 ## Endpoints Principales
 
-| Servicio             | URL                                      | Descripción                         |
-| -------------------- | ---------------------------------------- | ----------------------------------- |
-| **API REST**         | `http://localhost:8080/api/v1/`          | Endpoints de la aplicación          |
-| **Swagger UI**       | `http://localhost:8080/swagger-ui.html`  | Documentación interactiva de la API |
-| **H2 Console**       | `http://localhost:8080/h2-console`       | Consola de base de datos H2         |
-| **Actuator Health**  | `http://localhost:8080/actuator/health`  | Estado de salud del servicio        |
-| **Actuator Metrics** | `http://localhost:8080/actuator/metrics` | Métricas del servicio               |
-| **Actuator Info**    | `http://localhost:8080/actuator/info`    | Información del servicio            |
+| Servicio             | URL                                      | Descripción                                                |
+| -------------------- | ---------------------------------------- | ---------------------------------------------------------- |
+| **API REST**         | `http://localhost:8080/api/v1/`          | Endpoints de la API (productos, movimientos, alertas)      |
+| **Swagger UI**       | `http://localhost:8080/swagger-ui.html`  | Documentación interactiva de la API                        |
+| **Actuator Health**  | `http://localhost:8080/actuator/health`  | Estado de salud del servicio y sus componentes             |
+| **Actuator Metrics** | `http://localhost:8080/actuator/metrics` | Métricas JVM y de la aplicación (memoria, hilos, requests) |
 
 ### Endpoints API
 
-| Endpoint                                | Método | Descripción                                            |
-| --------------------------------------- | ------ | ------------------------------------------------------ |
-| `/api/v1/products`                      | GET    | Listar productos con paginación y filtro por categoría |
-| `/api/v1/products/{id}`                 | GET    | Obtener detalle de un producto                         |
-| `/api/v1/movements`                     | POST   | Registrar movimiento (actualiza stock automáticamente) |
-| `/api/v1/alerts`                        | GET    | Retornar productos con stock actual <= minStock        |
-| `/api/v1/movements/{productId}/history` | GET    | Historial de movimientos por producto                  |
+#### Productos
+
+| Endpoint                      | Método | Descripción                                                           |
+| ----------------------------- | ------ | --------------------------------------------------------------------- |
+| `/api/v1/products`            | GET    | Listar productos con paginación, filtro por categoría y ordenamiento  |
+| `/api/v1/products/{id}`       | GET    | Obtener detalle de un producto por ID                                 |
+| `/api/v1/categories`          | GET    | Listar todas las categorías disponibles                               |
+| `/api/v1/products/search`     | GET    | Buscar productos por texto (nombre, SKU, descripción)                 |
+| `/api/v1/products/{id}/stats` | GET    | Obtener estadísticas avanzadas de un producto (movimientos, promedio) |
+
+#### Movimientos
+
+| Endpoint                                | Método | Descripción                                                           |
+| --------------------------------------- | ------ | --------------------------------------------------------------------- |
+| `/api/v1/movements`                     | POST   | Registrar movimiento de entrada (IN) o salida (OUT), actualiza stock  |
+| `/api/v1/movements/{productId}/history` | GET    | Historial paginado de movimientos de un producto (ordenado por fecha) |
+
+#### Alertas
+
+| Endpoint         | Método | Descripción                                             |
+| ---------------- | ------ | ------------------------------------------------------- |
+| `/api/v1/alerts` | GET    | Listar alertas de stock (productos con stock <= mínimo) |
 
 ---
 
@@ -249,11 +260,16 @@ mvn spring-boot:run
 # Compilar
 mvn clean compile
 
-# Test
+# Ejecutar pruebas
 mvn test
 
-# Test con cobertura
-mvn test jacoco:report
+# Generar reporte de coverage (Jacoco)
+mvn jacoco:report
+
+# Ver reporte de coverage: abrir target/site/jacoco/index.html en navegador
+
+# Verificar coverage (ejecuta tests + verifica que cumpla el 85%)
+mvn verify
 
 # Build
 mvn clean package
@@ -261,6 +277,68 @@ mvn clean package
 # Dependencias
 mvn dependency:tree
 ```
+
+---
+
+## Testing
+
+### Framework
+
+- **Pruebas Unitarias**: JUnit 5
+- **Mocks**: Mockito
+- **Coverage**: JaCoCo
+
+### Cobertura Mínima Requerida
+
+- **Instrucciones**: 85%
+- **Branches**: 85%
+
+### Estructura de Tests
+
+```
+src/test/java/com/stockflow/
+├── controller/
+│   ├── ProductControllerTest.java
+│   ├── MovementControllerTest.java
+│   └── AlertControllerTest.java
+├── service/
+│   ├── ProductServiceTest.java
+│   ├── MovementServiceTest.java
+│   └── AlertServiceTest.java
+└── repository/
+    ├── ProductRepositoryTest.java
+    └── MovementRepositoryTest.java
+```
+
+### Ejecutar y Ver Reporte de Tests
+
+1. **Ejecutar pruebas**:
+
+```bash
+mvn test
+```
+
+2. **Generar reporte de coverage**:
+
+```bash
+mvn jacoco:report
+```
+
+3. **Ver reporte**:
+   - Abrir en navegador: `target/site/jacoco/index.html`
+   - O usar extensión "Live Server" en VS Code
+
+### Verificar Coverage (con check)
+
+```bash
+mvn verify
+```
+
+Este comando:
+
+1. Ejecuta las pruebas
+2. Verifica que la cobertura cumpla el mínimo (85%)
+3. Falla si no se cumple el threshold
 
 ---
 
@@ -272,25 +350,3 @@ El proyecto incluye datos de prueba en `data.sql` con:
   - Electrónica (laptops, teclados, mouse)
   - Redes (routers, switches, cables)
   - Accesorios (cámaras, discos, memorias)
-
----
-
-## Licencia
-
-Este proyecto es parte de una evaluación técnica confidencial.
-
----
-
-## Tiempo Invertido
-
-| Módulo            | Tiempo Estimado |
-| ----------------- | --------------- |
-| inventory-service | X horas         |
-| inventory-app     | X horas         |
-| **Total**         | X horas         |
-
----
-
-## Decisiones Técnicas
-
-[Documentar decisiones técnicas relevantes tomadas durante el desarrollo]

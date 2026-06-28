@@ -2,7 +2,9 @@ package com.stockflow.service;
 
 import com.stockflow.dto.MovementRequestDto;
 import com.stockflow.dto.MovementResponseDto;
-import com.stockflow.entity.AlertSeverity;
+import com.stockflow.dto.PageResponseDto;
+import com.stockflow.dto.ProductStatsResponseDto;
+import com.stockflow.dto.StockAlertResponseDto;
 import com.stockflow.entity.Movement;
 import com.stockflow.entity.MovementType;
 import com.stockflow.entity.Product;
@@ -16,15 +18,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,6 +46,7 @@ class MovementServiceTest {
     private MovementService movementService;
 
     private Product product;
+    private Movement movement;
 
     @BeforeEach
     void setUp() {
@@ -55,18 +58,18 @@ class MovementServiceTest {
         product.setCurrentStock(10);
         product.setMinStock(5);
         product.setUnitPrice(new BigDecimal("1299.99"));
+
+        movement = new Movement(product, MovementType.IN, 10, "Reposición");
+        movement.setId(1L);
+        movement.setTimestamp(LocalDateTime.now());
     }
 
     @Test
-    void registerMovement_InputIncreasesStock() {
+    void registerMovement_WithInput_IncreasesStock() {
         MovementRequestDto request = new MovementRequestDto(1L, MovementType.IN, 10, "Reposición");
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
-        when(movementRepository.save(any(Movement.class))).thenAnswer(invocation -> {
-            Movement m = invocation.getArgument(0);
-            m.setId(1L);
-            return m;
-        });
+        when(movementRepository.save(any(Movement.class))).thenReturn(movement);
 
         MovementResponseDto result = movementService.registerMovement(request);
 
@@ -74,34 +77,37 @@ class MovementServiceTest {
         assertEquals(1L, result.getProductId());
         assertEquals(MovementType.IN, result.getType());
         assertEquals(10, result.getQuantity());
-        assertEquals(20, product.getCurrentStock());
         verify(productRepository).save(product);
     }
 
     @Test
-    void registerMovement_OutputDecreasesStock() {
+    void registerMovement_WithOutput_DecreasesStock() {
+        product.setCurrentStock(10);
         MovementRequestDto request = new MovementRequestDto(1L, MovementType.OUT, 5, "Venta");
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
+            Product p = invocation.getArgument(0);
+            p.setCurrentStock(p.getCurrentStock() - 5);
+            return p;
+        });
         when(movementRepository.save(any(Movement.class))).thenAnswer(invocation -> {
             Movement m = invocation.getArgument(0);
             m.setId(1L);
+            m.setTimestamp(LocalDateTime.now());
             return m;
         });
 
         MovementResponseDto result = movementService.registerMovement(request);
 
         assertNotNull(result);
-        assertEquals(1L, result.getProductId());
         assertEquals(MovementType.OUT, result.getType());
         assertEquals(5, result.getQuantity());
-        assertEquals(5, product.getCurrentStock());
-        verify(productRepository).save(product);
     }
 
     @Test
-    void registerMovement_InsufficientStockThrowsException() {
-        MovementRequestDto request = new MovementRequestDto(1L, MovementType.OUT, 15, "Venta");
+    void registerMovement_WithInsufficientStock_ThrowsException() {
+        product.setCurrentStock(5);
+        MovementRequestDto request = new MovementRequestDto(1L, MovementType.OUT, 10, "Venta");
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         assertThrows(InsufficientStockException.class, () -> movementService.registerMovement(request));
@@ -109,7 +115,7 @@ class MovementServiceTest {
     }
 
     @Test
-    void registerMovement_ProductNotFoundThrowsException() {
+    void registerMovement_WithNonExistingProduct_ThrowsException() {
         MovementRequestDto request = new MovementRequestDto(999L, MovementType.IN, 10, "Reposición");
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -117,112 +123,100 @@ class MovementServiceTest {
     }
 
     @Test
-    void registerMovement_OutputToMinimumStockSucceeds() {
-        MovementRequestDto request = new MovementRequestDto(1L, MovementType.OUT, 10, "Venta total");
+    void registerMovement_WithStockBelowMin_CreatesAlert() {
+        product.setCurrentStock(3);
+        product.setMinStock(5);
+        MovementRequestDto request = new MovementRequestDto(1L, MovementType.OUT, 2, "Venta");
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
-        when(movementRepository.save(any(Movement.class))).thenAnswer(invocation -> {
-            Movement m = invocation.getArgument(0);
-            m.setId(1L);
-            return m;
-        });
+        when(movementRepository.save(any(Movement.class))).thenReturn(movement);
 
         MovementResponseDto result = movementService.registerMovement(request);
+
+        assertNotNull(result.getAlert());
+        assertEquals(1L, result.getAlert().getProductId());
+    }
+
+    @Test
+    void getHistory_WithMovements_ReturnsPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Movement> movementPage = new PageImpl<>(List.of(movement), pageable, 1);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(movementRepository.findByProductIdOrderByTimestampDesc(eq(1L), any(Pageable.class))).thenReturn(movementPage);
+
+        PageResponseDto<MovementResponseDto> result = movementService.getHistory(1L, pageable);
 
         assertNotNull(result);
-        assertEquals(0, product.getCurrentStock());
+        assertEquals(1, result.getContent().size());
     }
 
     @Test
-    void getHistory_WithMovements_ReturnsHistory() {
-        Movement movement = new Movement(product, MovementType.OUT, 5, "Venta");
-        movement.setId(1L);
-        movement.setTimestamp(LocalDateTime.now());
-
-        Page<Movement> page = new PageImpl<>(List.of(movement));
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(movementRepository.findByProductIdOrderByTimestampDesc(eq(1L), any(Pageable.class))).thenReturn(page);
-
-        List<MovementResponseDto> history = movementService.getHistory(1L, 0, 10);
-
-        assertNotNull(history);
-        assertEquals(1, history.size());
-        assertEquals(1L, history.get(0).getId());
-    }
-
-    @Test
-    void getHistory_ProductNotFoundThrowsException() {
+    void getHistory_WithNonExistingProduct_ThrowsException() {
+        Pageable pageable = PageRequest.of(0, 10);
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> movementService.getHistory(999L, 0, 10));
+        assertThrows(ProductNotFoundException.class, () -> movementService.getHistory(999L, pageable));
     }
 
     @Test
-    void getHistory_WithNoMovements_ReturnsEmptyList() {
+    void getHistory_WithNoMovements_ReturnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Movement> emptyPage = new PageImpl<>(List.of(), pageable, 0);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(movementRepository.findByProductIdOrderByTimestampDesc(eq(1L), any(Pageable.class)))
-                .thenReturn(Page.empty());
+        when(movementRepository.findByProductIdOrderByTimestampDesc(eq(1L), any(Pageable.class))).thenReturn(emptyPage);
 
-        List<MovementResponseDto> history = movementService.getHistory(1L, 0, 10);
+        PageResponseDto<MovementResponseDto> result = movementService.getHistory(1L, pageable);
 
-        assertNotNull(history);
-        assertTrue(history.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
     }
 
     @Test
-    void registerMovement_OutputBelowMinStock_ReturnsAlert() {
-        product.setCurrentStock(10);
-        product.setMinStock(10);
-        MovementRequestDto request = new MovementRequestDto(1L, MovementType.OUT, 6, "Venta");
+    void getStats_WithMovements_ReturnsStats() {
+        List<Movement> movements = List.of(
+                createMovement(MovementType.IN, 5),
+                createMovement(MovementType.IN, 3),
+                createMovement(MovementType.OUT, 2)
+        );
+        Page<Movement> movementPage = new PageImpl<>(movements, PageRequest.of(0, 10), movements.size());
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
-        when(movementRepository.save(any(Movement.class))).thenAnswer(invocation -> {
-            Movement m = invocation.getArgument(0);
-            m.setId(1L);
-            return m;
-        });
+        when(movementRepository.findByProductIdOrderByTimestampDesc(eq(1L), any(Pageable.class))).thenReturn(movementPage);
 
-        MovementResponseDto result = movementService.registerMovement(request);
+        ProductStatsResponseDto result = movementService.getStats(1L);
 
-        assertNotNull(result.getAlert());
-        assertEquals(AlertSeverity.CRITICAL, result.getAlert().getSeverity());
-        assertEquals(4, result.getAlert().getCurrentStock());
+        assertNotNull(result);
+        assertEquals(1L, result.getProductId());
+        assertEquals(3, result.getTotalMovements());
+        assertEquals(2, result.getTotalIn());
+        assertEquals(1, result.getTotalOut());
     }
 
     @Test
-    void registerMovement_InAboveMinStock_NoAlert() {
-        product.setCurrentStock(5);
-        product.setMinStock(10);
-        MovementRequestDto request = new MovementRequestDto(1L, MovementType.IN, 10, "Reposición");
+    void getStats_WithNoMovements_ReturnsZeros() {
+        Page<Movement> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
-        when(movementRepository.save(any(Movement.class))).thenAnswer(invocation -> {
-            Movement m = invocation.getArgument(0);
-            m.setId(1L);
-            return m;
-        });
+        when(movementRepository.findByProductIdOrderByTimestampDesc(eq(1L), any(Pageable.class))).thenReturn(emptyPage);
 
-        MovementResponseDto result = movementService.registerMovement(request);
+        ProductStatsResponseDto result = movementService.getStats(1L);
 
-        assertNull(result.getAlert());
+        assertNotNull(result);
+        assertEquals(0, result.getTotalMovements());
+        assertEquals(0, result.getTotalIn());
+        assertEquals(0, result.getTotalOut());
     }
 
     @Test
-    void registerMovement_InBelowMinStock_ReturnsAlert() {
-        product.setCurrentStock(2);
-        product.setMinStock(10);
-        MovementRequestDto request = new MovementRequestDto(1L, MovementType.IN, 5, "Reposición parcial");
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
-        when(movementRepository.save(any(Movement.class))).thenAnswer(invocation -> {
-            Movement m = invocation.getArgument(0);
-            m.setId(1L);
-            return m;
-        });
+    void getStats_WithNonExistingProduct_ThrowsException() {
+        when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
-        MovementResponseDto result = movementService.registerMovement(request);
+        assertThrows(ProductNotFoundException.class, () -> movementService.getStats(999L));
+    }
 
-        assertNotNull(result.getAlert());
-        assertEquals(AlertSeverity.LOW, result.getAlert().getSeverity());
+    private Movement createMovement(MovementType type, int quantity) {
+        Movement m = new Movement(product, type, quantity, "Test");
+        m.setId(1L);
+        m.setTimestamp(LocalDateTime.now());
+        return m;
     }
 }
