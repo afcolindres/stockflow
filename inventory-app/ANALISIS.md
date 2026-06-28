@@ -14,7 +14,7 @@
 ### Requisitos No Funcionales
 
 - **Responsive/Multiplataforma**: Acceso desde múltiples dispositivos
-- **Rendimiento**: Carga rápida con @defer
+- **Rendimiento**: Carga rápida con lazy loading
 - **Tiempo Real**: Actualización de alertas al registrar movimiento
 - **Persistencia**: Guardar filtros en localStorage
 
@@ -42,10 +42,43 @@ interface IProduct {
 interface IMovement {
   id: number;
   productId: number;
+  productName?: string;
   type: 'IN' | 'OUT';
   quantity: number;
   reason: string;
   timestamp: string;
+  alert?: {
+    productId: number;
+    productName: string;
+    currentStock: number;
+    minStock: number;
+    severity: 'LOW' | 'CRITICAL';
+  };
+}
+```
+
+### IMovementRequest
+
+```typescript
+interface IMovementRequest {
+  productId: number;
+  type: 'IN' | 'OUT';
+  quantity: number;
+  reason: string;
+}
+```
+
+### IProductStats
+
+```typescript
+interface IProductStats {
+  productId: number;
+  productName: string;
+  totalMovements: number;
+  totalIn: number;
+  totalOut: number;
+  averagePerMonth: number;
+  lastMovement: string | null;
 }
 ```
 
@@ -78,7 +111,7 @@ interface IApiResponse<T> {
 ### Flujo: Registrar Movimiento de Salida
 
 ```
-1. Usuario selecciona producto
+1. Usuario selecciona producto (con búsqueda)
 2. Usuario selecciona tipo: OUT (salida)
 3. Usuario ingresa cantidad
 4. Usuario ingresa razón
@@ -87,7 +120,8 @@ interface IApiResponse<T> {
 7. Sistema actualiza stock del producto
 8. Sistema verifica si stock < minStock
 9. Si stock < minStock: dispara alerta
-10. UI muestra alerta si aplica
+10. UI muestra alerta si aplica (toast)
+11. UI actualiza dashboard automáticamente
 ```
 
 ### Casos de Prueba del Flujo
@@ -130,7 +164,14 @@ interface IApiResponse<T> {
 ### UC-005: Ver Historial
 
 - El usuario puede ver el historial de movimientos de un producto
-- El historial se carga con @defer (on interaction)
+
+### UC-006: Buscar Productos
+
+- El usuario puede buscar productos por nombre
+
+### UC-007: Ver Estadísticas de Producto
+
+- El usuario puede ver estadísticas de un producto (total movimientos, entradas, salidas, promedio mensual)
 
 ---
 
@@ -170,10 +211,24 @@ interface IApiResponse<T> {
 
 | Campo        | Tipo      | Validación                  |
 | ------------ | --------- | --------------------------- |
-| Producto     | Select   | Obligatorio                 |
+| Producto     | Select   | Obligatorio, con búsqueda   |
 | Tipo         | Select   | IN o OUT                    |
 | Cantidad     | Number   | > 0, máximo stock si OUT   |
 | Razón        | Text     | Obligatorio                 |
+
+### Vista: Detalle de Producto
+
+| Campo            | Descripción                        |
+| ---------------- | --------------------------------- |
+| SKU              | Código del producto               |
+| Nombre          | Nombre del producto               |
+| Categoría       | Categoría del producto           |
+| Stock Actual    | Stock actual del producto        |
+| Stock Mínimo    | Umbral de alerta                 |
+| Precio Unitario | Precio por unidad                 |
+| Estado Badge    | OK / BAJO / CRÍTICO              |
+| Historial       | Tabla de movimientos              |
+| Estadísticas    | KPIs de movimientos                |
 
 ---
 
@@ -201,9 +256,12 @@ http://localhost:8080/api/v1
 | ------ | ---------------------------- | ----------------------------------- |
 | GET    | /products                    | Listar productos (paginado)          |
 | GET    | /products/{id}               | Obtener producto por ID              |
+| GET    | /products/search             | Buscar productos por nombre          |
+| GET    | /products/{id}/stats          | Obtener estadísticas de producto    |
 | POST   | /movements                   | Registrar movimiento              |
-| GET    | /alerts                      | Listar alertas de stock             |
 | GET    | /movements/{productId}/history | Historial de movimientos           |
+| GET    | /alerts                      | Listar alertas de stock             |
+| GET    | /categories                   | Listar categorías disponibles        |
 
 ---
 
@@ -221,7 +279,7 @@ http://localhost:8080/api/v1
 
 ## 9. Requisitos No Funcionales
 
-- **Rendimiento**: Carga de componentes con @defer
+- **Rendimiento**: Carga de componentes con lazy loading
 - **UX**: Skeleton loaders durante peticiones
 - **Persistencia**: Filtros en localStorage
 - **Reactividad**: Signals para estado en tiempo real

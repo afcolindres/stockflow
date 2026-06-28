@@ -11,6 +11,8 @@
 | US-005 | Consultar Alertas de Stock               | 2           | Completada |
 | US-006 | Historial de Movimientos por Producto    | 2           | Completada |
 | US-007 | Estadísticas Avanzadas de Producto     | 2           | Completada |
+| US-008 | Listar Categorías                       | 1           | Completada |
+| US-009 | Buscar Productos                        | 2           | Completada |
 
 ---
 
@@ -307,6 +309,74 @@ Como usuario del sistema, quiero obtener estadísticas avanzadas de un producto 
 ### Dependencias
 
 Requiere US-006 completa (historial con paginación)
+
+---
+
+## US-008: Listar Categorías
+
+### Descripción
+
+Como usuario del sistema, quiero listar todas las categorías disponibles para poder filtrar productos fácilmente.
+
+### Criterios de Aceptación
+
+- [x] Listar todas las categorías únicas de productos
+- [x] Excluir categorías duplicadas
+- [x] Retornar lista de strings
+- [x] Documentar endpoint con OpenAPI
+
+### Estimación
+
+| Complejidad | 1 |
+| Tiempo estimado | 1 hora |
+
+### Notas Técnicas
+
+- Endpoint: GET `/api/v1/categories`
+- Servicio: `com.stockflow.service.ProductService.findAllCategories()`
+- Repositorio: `ProductRepository.findAllCategories()`
+
+### Bloqueos
+
+Requiere US-001 completa
+
+---
+
+## US-009: Buscar Productos
+
+### Descripción
+
+Como usuario del sistema, quiero buscar productos por texto para encontrar rápidamente lo que necesito.
+
+### Criterios de Aceptación
+
+- [x] Buscar por nombre o SKU
+- [x] Soportar límite de resultados (parámetro limit)
+- [x] Retornar lista de productos
+- [x] Documentar endpoint con OpenAPI
+- [x] Usar LIKE para búsqueda flexible
+
+### Estimación
+
+| Complejidad | 2 |
+| Tiempo estimado | 2 horas |
+
+### Ideas de Test
+
+- [ ] Verificar búsqueda por nombre
+- [ ] Verificar búsqueda por SKU
+- [ ] Verificar límite de resultados
+- [ ] Verificar respuesta vacía sin resultados
+
+### Notas Técnicas
+
+- Endpoint: GET `/api/v1/products/search?q={query}&limit={limit}`
+- Servicio: `com.stockflow.service.ProductService.search()`
+- Parámetros: `q` (texto de búsqueda), `limit` (default 20)
+
+### Bloqueos
+
+Requiere US-001 completa
 
 ---
 

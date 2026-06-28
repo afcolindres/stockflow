@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Establecer estándares de diseño para la SPA inventory-app con Angular Material y estilo moderno.
+Establecer estándares de diseño para la SPA inventory-app con CSS vanilla y estilo moderno.
 
 ---
 
@@ -30,9 +30,9 @@ Establecer estándares de diseño para la SPA inventory-app con Angular Material
 
 | Estado    | Color     | Background Badge |
 | --------- | ----------| -----------------|
-| OK        | `#2e7d32` | `#e8f5e9`        |
-| BAJO      | `#F59020` | `#fff3e0`        |
-| CRÍTICO   | `#E22827` | `#ffebee`       |
+| OK        | `#155724` | `#d4edda`        |
+| BAJO      | `#856404` | `#fff3cd`        |
+| CRÍTICO   | `#721c24` | `#f8d7da`       |
 
 ### Colores de Severidad
 
@@ -63,60 +63,56 @@ Font Family: 'Poppins', system-ui, -apple-system, sans-serif
 
 ---
 
-## Componentes UI (Angular Material)
+## Componentes UI (CSS Vanilla)
 
 ### Cards (KPIs)
 
-- Background: `#FFFFFF` (light) / `#1E2A3A` (dark)
-- Border radius: 12px
-- Box shadow: `0 2px 8px rgba(0,0,0,0.1)`
-- Padding: 16px
+- Background: `#FFFFFF`
+- Border radius: 8px
+- Box shadow: `0 1px 3px rgba(0,0,0,0.1)`
+- Padding: 24px
 
 ### Badges de Estado
 
 | Badge   | Background | Color Texto | Borde    |
 | --------| ---------- | ----------- | --------|
-| OK      | `#e8f5e9`  | `#2e7d32`  | none    |
-| BAJO    | `#fff3e0`  | `#F59020`  | none    |
-| CRÍTICO | `#ffebee` | `#E22827`  | none    |
+| OK      | `#d4edda`  | `#155724`  | none    |
+| BAJO    | `#fff3cd`  | `#856404`  | none    |
+| CRÍTICO | `#f8d7da` | `#721c24`  | none    |
 
 ### Tabla de Productos
 
-- Header: Background `#f5f5f5`, font-weight 600
+- Header: Background `#f8f9fa`, font-weight 600
 - Filas alternadas: Background `#fafafa`
-- Hover: Background `#f0f0f0`
-- Border radius: 8px
+- Hover: Background `#f8f9fa`
+- Border radius: 8px (en table container)
 
 ### Formulario de Movimiento
 
-- Inputs con Angular Material (mat-form-field)
+- Inputs con CSS nativo
 - Validation messages en color `#E22827`
 - Botón primario: Background `#183473`, texto `#FFFFFF`
 - Botón deshabilitado: Opacidad 0.5
 
 ---
 
-## Angular Material Components
+## Componentes UI (Custom CSS)
 
 ### componentes Recomendados
 
-| Componente           | Uso                              |
+| Componente           | Implementación                 |
 | ------------------- | --------------------------------|
-| `mat-card`          | KPIs del dashboard              |
-| `mat-table`         | Listado de productos            |
-| `mat-paginator`     | Paginación                     |
-| `mat-form-field`    | Inputs del formulario          |
-| `mat-select`        | Select de producto y tipo      |
-| `mat-input`         | Campos de texto                |
-| `mat-button`        | Botones                        |
-| `mat-raised-button` | Botones elevados              |
-| `mat-flat-button`   | Botones planos                 |
-| `mat-icon`          | Iconos                        |
-| `mat-spinner`       | Loading indicator              |
-| `mat-progress-bar`  | Progress bar                  |
-| `mat-snack-bar`     | Notificaciones toast           |
-| `mat-dialog`        | Diálogos                      |
-| `mat-select`        | Dropdowns                     |
+| `.kpi-card`         | KPIs del dashboard              |
+| `.product-table`    | Listado de productos            |
+| `.paginator`       | Paginación manual               |
+| `.form-field`      | Inputs del formulario          |
+| `<select>`          | Select nativo HTML             |
+| `<input>`           | Campos de texto nativo          |
+| `.btn`              | Botones personalizados           |
+| `.btn-primary`      | Botones principales             |
+| `.skeleton-loader`  | Loading skeleton               |
+| `.toast`           | Notificaciones toast           |
+| `.modal`           | Modal para movement-form         |
 
 ---
 
@@ -174,18 +170,41 @@ Font Family: 'Poppins', system-ui, -apple-system, sans-serif
 
 ## Skeleton Loaders
 
-### Estilos
+### Componente SkeletonLoader
 
-```css
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+```typescript
+@Component({
+  selector: 'app-skeleton-loader',
+  standalone: true,
+  template: `
+    <div class="skeleton-container">
+      @for (item of rows |; track $index) {
+        <div class="skeleton-row" [style.height]="rowHeight"></div>
+      }
+    </div>
+  `,
+  styles: [`
+    .skeleton-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .skeleton-row {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  `]
+})
+export class SkeletonLoaderComponent {
+  @Input() rows = 5;
+  @Input() rowHeight = '48px';
+  @Input() dataTestId = 'skeleton-loader';
 }
 ```
 
@@ -203,52 +222,18 @@ Font Family: 'Poppins', system-ui, -apple-system, sans-serif
 
 | Tipo    | Background  | Color Texto | Icono      |
 |--------| ----------- | ----------- | ----------|
-| Success| `#e8f5e9`  | `#2e7d32`  | check_circle |
-| Error  | `#ffebee`  | `#E22827`  | error      |
-| Warning| `#fff3e0`  | `#F59020`  | warning    |
-| Info   | `#e3f2fd`  | `#405BA7`  | info       |
+| Success| `#d4edda`  | `#155724`  | ✓         |
+| Error  | `#f8d7da`  | `#721c24`  | ✕         |
+| Warning| `#fff3cd`  | `#856404`  | ⚠         |
+| Info   | `#cce5ff`  | `#004085`  | ℹ        |
 
 ---
 
-## @defer Bloques
-
-### @placeholder
-
-```html
-@placeholder {
-  <div class="skeleton-loader"></div>
-}
-```
-
-### @loading
-
-```html
-@loading {
-  <mat-spinner diameter="40"></mat-spinner>
-}
-```
-
-### @error
-
-```html
-@error {
-  <mat-card class="error-card">
-    <mat-icon>error</mat-icon>
-    <p>Error al cargar los datos</p>
-  </mat-card>
-}
-```
-
----
-
-## Configuración de Angular Material
-
-### app.config.ts
+## Configuración de app.config.ts
 
 ```typescript
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
@@ -258,7 +243,6 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideAnimationsAsync(),
     provideHttpClient(withInterceptors([errorInterceptor]))
   ]
 };
@@ -312,9 +296,9 @@ export class AppComponent {
 
 ## Notas Importantes
 
-1. **Angular Material**: Usar componentes de Material para consistencia
+1. **CSS Vanilla**: Sin frameworks UI, estilos custom
 2. **Signals**: Para estado reactivo
-3. **@defer**: Para carga diferida de historial
-4. **Skeleton**: Durante cargas HTTP
-5. **Toast**: Para errores y notificaciones
-6. **Dark Mode**: Opcional pero soportado
+3. **Skeleton**: Durante cargas HTTP
+4. **Toast**: Para errores y notificaciones (con tipos success/error/warning/info)
+5. **Modal**: MovementForm se abre como modal
+6. **Navbar**: Barra de navegación fija

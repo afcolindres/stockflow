@@ -18,21 +18,22 @@ public class InventoryHealthIndicator implements HealthIndicator {
 
     @Override
     public Health health() {
+        long totalProducts = alertService.countTotalProducts();
         long totalAlerts = alertService.countTotalAlerts();
         long criticalAlerts = alertService.countCriticalAlerts();
 
-        if (totalAlerts == 0) {
+        if (totalProducts == 0) {
             return Health.up()
-                    .withDetail("message", "No hay alertas de stock")
+                    .withDetail("message", "No hay productos registrados")
                     .build();
         }
 
-        double criticalPercentage = (double) criticalAlerts / totalAlerts;
+        double criticalPercentage = (double) criticalAlerts / totalProducts;
 
         if (criticalPercentage > CRITICAL_THRESHOLD) {
             return Health.down()
                     .withDetail("criticalAlerts", criticalAlerts)
-                    .withDetail("totalAlerts", totalAlerts)
+                    .withDetail("totalProducts", totalProducts)
                     .withDetail("criticalPercentage", String.format("%.1f%%", criticalPercentage * 100))
                     .withDetail("message", "Más del 20% de productos en alerta crítica")
                     .build();
@@ -41,6 +42,7 @@ public class InventoryHealthIndicator implements HealthIndicator {
         return Health.up()
                 .withDetail("criticalAlerts", criticalAlerts)
                 .withDetail("totalAlerts", totalAlerts)
+                .withDetail("totalProducts", totalProducts)
                 .build();
     }
 }

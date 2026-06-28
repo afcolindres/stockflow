@@ -2,7 +2,7 @@
 
 ## Tecnologías
 
-- **Backend**: Spring Boot 3.5+
+- **Backend**: Spring Boot 3.5.0
 - **Framework**: Spring Web (REST)
 - **ORM**: Spring Data JPA / Hibernate
 - **Base de datos**: H2 (en memoria)
@@ -12,6 +12,7 @@
 - **Actuator**: Spring Boot Actuator
 - **Testing**: JUnit 5, Mockito
 - **Build**: Maven
+- **Java**: 17
 
 ---
 
@@ -57,12 +58,10 @@ inventory-service/
 │   │   │   ├── controller/      # Controladores REST
 │   │   │   ├── service/         # Lógica de negocio
 │   │   │   ├── repository/     # Repositorios JPA
-│   │   │   ├── model/          # Entidades
+│   │   │   ├── entity/          # Entidades JPA
 │   │   │   ├── dto/            # Data Transfer Objects
 │   │   │   ├── exception/      # Excepciones personalizadas
-│   │   │   ├── config/         # Configuración
-│   │   │   └── inventory/
-│   │   │       └── service/    # Servicios de inventario
+│   │   │   └── config/         # Configuración
 │   │   └── resources/
 │   │       ├── application.yml # Configuración
 │   │       ├── data.sql        # Datos iniciales
@@ -88,27 +87,32 @@ inventory-service/
 | currentStock | Integer    | Stock actual        |
 | minStock     | Integer    | Stock mínimo        |
 | unitPrice    | BigDecimal | Precio unitario     |
+| movements    | List<Movement> | Relación OneToMany |
 
 ### Movement
 
 | Campo     | Tipo          | Descripción                 |
 | --------- | ------------- | --------------------------- |
 | id        | Long          | Identificador único         |
-| productId | Long          | ID del producto             |
-| type      | Enum          | IN (entrada) / OUT (salida) |
+| product   | Product      | Relación ManyToOne         |
+| type      | Enum         | IN (entrada) / OUT (salida) |
 | quantity  | Integer       | Cantidad                    |
 | reason    | String        | Razón del movimiento        |
 | timestamp | LocalDateTime | Fecha y hora                |
 
-### StockAlert
+### AlertSeverity (Enum)
 
-| Campo        | Tipo    | Descripción         |
-| ------------ | ------- | ------------------- |
-| productId    | Long    | ID del producto     |
-| productName  | String  | Nombre del producto |
-| currentStock | Integer | Stock actual        |
-| minStock     | Integer | Stock mínimo        |
-| severity     | Enum    | LOW / CRITICAL      |
+| Valor     | Descripción         |
+| ---------- | ------------------- |
+| LOW       | Stock bajo mínimo  |
+| CRITICAL | Stock <= minStock/2 |
+
+### MovementType (Enum)
+
+| Valor | Descripción         |
+| ------ | ------------------- |
+| IN    | Entrada de stock    |
+| OUT   | Salida de stock     |
 
 ---
 
@@ -118,9 +122,12 @@ inventory-service/
 | --------------------------------------- | ------ | ------------------------------------------------------ |
 | `/api/v1/products`                      | GET    | Listar productos con paginación y filtro por categoría |
 | `/api/v1/products/{id}`                 | GET    | Obtener detalle de un producto                         |
+| `/api/v1/categories`                    | GET    | Listar todas las categorías disponibles               |
+| `/api/v1/products/search`              | GET    | Buscar productos por texto                            |
+| `/api/v1/products/{id}/stats`           | GET    | Obtener estadísticas de producto                      |
 | `/api/v1/movements`                     | POST   | Registrar movimiento (actualiza stock automáticamente) |
-| `/api/v1/alerts`                        | GET    | Retornar productos con stock actual <= minStock        |
 | `/api/v1/movements/{productId}/history` | GET    | Historial de movimientos por producto                  |
+| `/api/v1/alerts`                        | GET    | Retornar productos con stock actual <= minStock        |
 
 ---
 
@@ -198,8 +205,8 @@ Si es así, reporta estado DOWN con porcentaje.
 - **Framework**: JUnit 5
 - **Mocks**: Mockito
 - **Cobertura mínima**: 70%
-- **Tests unitarios**: `/src/test/java/`
-- **Tests de integración**: carpeta dedicada
+- **Tests unitarios**: `src/test/java/com/stockflow/`
+- **Tests de integración**: carpeta dedicada en test
 
 ---
 

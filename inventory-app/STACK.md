@@ -2,14 +2,14 @@
 
 ## Tecnologías
 
-- **Framework**: Angular 16+
+- **Framework**: Angular 17
 - **Lenguaje**: TypeScript 5.x
-- **UI**: Angular Material
+- **UI**: CSS vanilla (sin frameworks)
 - **Estado**: Signals (signal, computed, effect)
 - **HTTP**: HttpClient con interceptores
 - **Rutas**: Router con lazy loading
 - **Forms**: Reactive Forms
-- **Testing**: Jest / Jasmine + Karma
+- **Testing**: Jest
 
 ---
 
@@ -21,20 +21,19 @@ inventory-app/
 │   ├── app/
 │   │   ├── components/
 │   │   │   ├── dashboard/
-│   │   │   │   ├── dashboard.component.ts
-│   │   │   │   └── dashboard.component.html
+│   │   │   │   └── dashboard.component.ts
 │   │   │   ├── product-list/
-│   │   │   │   ├── product-list.component.ts
-│   │   │   │   └── product-list.component.html
+│   │   │   │   └── product-list.component.ts
+│   │   │   ├── product-detail/
+│   │   │   │   └── product-detail.component.ts
 │   │   │   ├── alerts-panel/
-│   │   │   │   ├── alerts-panel.component.ts
-│   │   │   │   └── alerts-panel.component.html
+│   │   │   │   └── alerts-panel.component.ts
 │   │   │   ├── movement-form/
-│   │   │   │   ├── movement-form.component.ts
-│   │   │   │   └── movement-form.component.html
-│   │   │   └── movement-history/
-│   │   │       ├── movement-history.component.ts
-│   │   │       └── movement-history.component.html
+│   │   │   │   └── movement-form.component.ts
+│   │   │   ├── navbar/
+│   │   │   │   └── navbar.component.ts
+│   │   │   └── skeleton-loader/
+│   │   │       └── skeleton-loader.component.ts
 │   │   ├── services/
 │   │   │   ├── inventory.service.ts
 │   │   │   ├── inventory.store.ts
@@ -45,8 +44,12 @@ inventory-app/
 │   │   │   ├── product.model.ts
 │   │   │   ├── movement.model.ts
 │   │   │   └── alert.model.ts
+│   │   ├── mocks/
+│   │   │   ├── products.mock.ts
+│   │   │   ├── movements.mock.ts
+│   │   │   ├── alerts.mock.ts
+│   │   │   └── index.ts
 │   │   ├── app.component.ts
-│   │   ├── app.component.html
 │   │   ├── app.config.ts
 │   │   └── app.routes.ts
 │   ├── styles.css
@@ -71,9 +74,11 @@ inventory-app/
 | ------------------ | ---------------------------------- |
 | `dashboard/`       | KPI cards con signals               |
 | `product-list/`    | Tabla de productos con filtros       |
+| `product-detail/`  | Detalle de producto + historial    |
 | `alerts-panel/`    | Panel de alertas de stock           |
 | `movement-form/`   | Formulario de movimiento reactivo     |
-| `movement-history/`| Historial cargado con @defer    |
+| `navbar/`         | Barra de navegación                |
+| `skeleton-loader/` | Loader esqueleto para loading      |
 
 ### `src/app/services/`
 
@@ -130,10 +135,18 @@ export interface IProduct {
 export interface IMovement {
   id: number;
   productId: number;
+  productName?: string;
   type: 'IN' | 'OUT';
   quantity: number;
   reason: string;
   timestamp: string;
+  alert?: {
+    productId: number;
+    productName: string;
+    currentStock: number;
+    minStock: number;
+    severity: 'LOW' | 'CRITICAL';
+  };
 }
 ```
 
@@ -145,6 +158,20 @@ export interface IMovementRequest {
   type: 'IN' | 'OUT';
   quantity: number;
   reason: string;
+}
+```
+
+### IProductStats
+
+```typescript
+export interface IProductStats {
+  productId: number;
+  productName: string;
+  totalMovements: number;
+  totalIn: number;
+  totalOut: number;
+  averagePerMonth: number;
+  lastMovement: string | null;
 }
 ```
 
@@ -176,26 +203,25 @@ export interface IApiResponse<T> {
 
 ### Productivas
 
-- `@angular/core`: 16+
-- `@angular/router`: 16+
-- `@angular/forms`: 16+
-- `@angular/common/http`: 16+
-- `@angular/material`: 16+
+- `@angular/core`: 17
+- `@angular/router`: 17
+- `@angular/forms`: 17
+- `@angular/common/http`: 17
 
 ### Estado Reactivo
 
-- **Signals**: Integrados en Angular 16+
+- **Signals**: Integrados en Angular 17
 
 ### UI & Estilos
 
-- `@angular/material`: Componentes UI
+- CSS vanilla (sin frameworks)
 - `rxjs`: Operaciones asíncronas
 
 ### Testing
 
 - `@angular/core`: Testing
-- `jasmine`: Framework de testing
-- `karma`: Test runner
+- `jest`: Framework de testing
+- `jest-preset-angular`: Preset para Angular
 
 ---
 
@@ -219,14 +245,14 @@ export const routes: Routes = [
       .then(m => m.ProductListComponent)
   },
   {
+    path: 'products/:id',
+    loadComponent: () => import('./components/product-detail/product-detail.component')
+      .then(m => m.ProductDetailPage)
+  },
+  {
     path: 'alerts',
     loadComponent: () => import('./components/alerts-panel/alerts-panel.component')
       .then(m => m.AlertsPanelComponent)
-  },
-  {
-    path: 'movements',
-    loadComponent: () => import('./components/movement-form/movement-form.component')
-      .then(m => m.MovementFormComponent)
   }
 ];
 ```
@@ -240,21 +266,37 @@ export const routes: Routes = [
 ```typescript
 @Injectable({ providedIn: 'root' })
 export class InventoryStore {
-  private products = signal<IProduct[]>([]);
-  private alerts = signal<IStockAlert[]>([]);
-  private selectedProduct = signal<IProduct | null>(null);
-  private loading = signal<boolean>(false);
-  private error = signal<string | null>(null);
+  private readonly products = signal<IProduct[]>([]);
+  private readonly alerts = signal<IStockAlert[]>([]);
+  private readonly selectedProduct = signal<IProduct | null>(null);
+  private readonly loading = signal<boolean>(false);
+  private readonly error = signal<string | null>(null);
+
+  private readonly filters = signal<FilterState>({
+    category: '',
+    page: 0,
+    size: 10,
+  });
+
+  private readonly pagination = signal({ totalPages: 0, totalElements: 0 });
+  private readonly categories = signal<string[]>([]);
 
   readonly products$ = this.products.asReadonly();
   readonly alerts$ = this.alerts.asReadonly();
   readonly selectedProduct$ = this.selectedProduct.asReadonly();
   readonly loading$ = this.loading.asReadonly();
   readonly error$ = this.error.asReadonly();
+  readonly filters$ = this.filters.asReadonly();
+  readonly pagination$ = this.pagination.asReadonly();
+  readonly categories$ = this.categories.asReadonly();
 
-  readonly totalProducts = computed(() => this.products().length);
+  readonly totalProducts = computed(() => this.pagination().totalElements);
+  readonly activeAlerts = computed(() => this.alerts().length);
   readonly criticalAlerts = computed(() =>
     this.alerts().filter(a => a.severity === 'CRITICAL').length
+  );
+  readonly totalStock = computed(() =>
+    this.products().reduce((sum, p) => sum + p.currentStock, 0)
   );
   readonly totalValue = computed(() =>
     this.products().reduce((sum, p) => sum + (p.currentStock * p.unitPrice), 0)
@@ -262,52 +304,29 @@ export class InventoryStore {
 
   constructor() {
     effect(() => {
-      localStorage.setItem('filters', JSON.stringify(this.filters()));
+      const currentFilters = this.filters();
+      localStorage.setItem('inventory-filters', JSON.stringify(currentFilters));
     });
 
     effect(() => {
       const alerts = this.alerts();
       if (alerts.length > 0) {
-        this.toastService.show(`${alerts.length} alertas activas`);
+        this.toastService.show(`${alerts.length} alertas activas`, 'info');
       }
     });
+
+    this.loadFiltersFromStorage();
   }
 
-  loadProducts(): Promise<void> { ... }
-  loadAlerts(): Promise<void> { ... }
-  createMovement(request: IMovementRequest): Promise<void> { ... }
-}
-```
-
----
-
-## @defer para Vistas Diferidas
-
-### Historial de Movimientos (on interaction)
-
-```html
-@defer (on interaction(productCard)) {
-  <app-movement-history [productId]="product.id" />
-} @placeholder {
-  <div class="skeleton"></div>
-} @loading {
-  <app-spinner />
-} @error {
-  <app-error-message />
-}
-```
-
-### Estadísticas Avanzadas (on viewport)
-
-```html
-@defer (on viewport) {
-  <app-advanced-stats [data]="products()" />
-} @placeholder {
-  <div class="skeleton"></div>
-} @loading {
-  <app-spinner />
-} @error {
-  <app-error-message />
+  setFilters(filters: Partial<FilterState>): void { ... }
+  async loadProducts(): Promise<void> { ... }
+  async loadAlerts(): Promise<void> { ... }
+  async loadCategories(): Promise<void> { ... }
+  async createMovement(request: IMovementRequest): Promise<boolean> { ... }
+  async searchProducts(query: string, limit?: number): Promise<IProduct[]> { ... }
+  async getMovementHistory(productId: number, page?: number, size?: number): Promise<any> { ... }
+  async getProductById(id: number): Promise<IProduct | null> { ... }
+  async getProductStats(productId: number): Promise<IProductStats | null> { ... }
 }
 ```
 
@@ -344,14 +363,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
 1. **Standalone Components**: Todos los componentes son standalone
 2. **Signals**: signal(), computed(), effect() para estado reactivo
-3. **@defer**: Para carga diferida de historial y estadísticas
-4. **lazy loading**: loadComponent para rutas
-5. **inject()**: Para inyección de dependencias
-6. **localStorage**: Persistir filtros activos
-7. **Toast**: Notificaciones automáticas
-8. **firstValueFrom**: Usar en lugar de `.toPromise()` (deprecated en RxJS v7+)
-9. **readonly**: Todas las propiedades públicas de servicios y componentes deben ser `readonly`
-10. **err: unknown**: Usar en catch blocks con type guard (`instanceof Error`) para acceder propiedades
+3. **lazy loading**: loadComponent para rutas
+4. **inject()**: Para inyección de dependencias
+5. **localStorage**: Persistir filtros activos (key: `inventory-filters`)
+6. **Toast**: Notificaciones automáticas con tipo (success, error, warning, info)
+7. **firstValueFrom**: Usar para convertir Observable a Promise
+8. **readonly**: Todas las propiedades públicas de servicios y componentes deben ser `readonly`
+9. **err: unknown**: Usar en catch blocks con type guard (`instanceof Error`) para acceder propiedades
+10. **Modal**: MovementForm se abre como modal desde ProductList
 
 ---
 

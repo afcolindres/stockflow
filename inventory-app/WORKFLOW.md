@@ -22,7 +22,7 @@ Antes de implementar, el agente revisará:
 | --------------------- | ------------------------------------------------ |
 | **ANALISIS.md**       | Requisitos, entidades y casos de uso del negocio |
 | **STACK.md**          | Stack técnico, tecnologías y herramientas        |
-| **USER-STORIES.md**   | Las 13 User Stories de Angular                   |
+| **USER-STORIES.md**   | Las User Stories de Angular                      |
 | **inventory-service** | Endpoints del API disponibles                    |
 
 ### 3. Desarrollo
@@ -35,7 +35,7 @@ Antes de implementar, el agente revisará:
 5. Implementar según criterios de aceptación
 6. Verificar según STACK.md
 7. Verificar tipos TypeScript
-8. Tests unitarios con Jest/Jasmine
+8. Tests unitarios con Jest
 9. Formatear archivos con Prettier:
    - TypeScript: npx prettier --write "src/**/*.{ts,tsx}"
 ```
@@ -69,8 +69,8 @@ El agente entregara:
 | Archivo         | Descripción                                     |
 | --------------- | ----------------------------------------------- |
 | ANALISIS.md     | Requisitos del sistema, entidades, casos de uso |
-| STACK.md        | Stack técnico (Angular 16+, Signals, @defer)    |
-| USER-STORIES.md | 13 User Stories de Angular                      |
+| STACK.md        | Stack técnico (Angular 17, Signals, CSS vanilla)   |
+| USER-STORIES.md | User Stories de Angular                      |
 
 ### Estructura del Proyecto
 
@@ -79,28 +79,36 @@ src/app/
 ├── components/
 │   ├── dashboard/        # KPI cards
 │   ├── product-list/     # Tabla con filtros
+│   ├── product-detail/  # Detalle + historial
 │   ├── alerts-panel/     # Panel de alertas
-│   ├── movement-form/    # Formulario reactivo
-│   └── movement-history/  # Historial con @defer
+│   ├── movement-form/    # Formulario reactivo (modal)
+│   ├── navbar/          # Barra de navegación
+│   └── skeleton-loader/  # Loader esqueleto
 ├── services/
 │   ├── inventory.service.ts   # HTTP calls
 │   ├── inventory.store.ts     # Signals state
 │   └── toast.service.ts        # Notifications
 ├── interceptors/
 │   └── error.interceptor.ts    # HTTP errors
-└── models/
-    ├── product.model.ts
-    ├── movement.model.ts
-    └── alert.model.ts
+├── models/
+│   ├── product.model.ts
+│   ├── movement.model.ts
+│   └── alert.model.ts
+└── mocks/
+    ├── products.mock.ts
+    ├── movements.mock.ts
+    ├── alerts.mock.ts
+    └── index.ts
 ```
 
 ### Stack Técnico
 
-- **Framework**: Angular 16+
+- **Framework**: Angular 17
 - **Componentes**: Standalone
 - **Estado**: Signals (signal, computed, effect)
-- **UI**: Angular Material
+- **UI**: CSS vanilla
 - **HTTP**: HttpClient con interceptores
+- **Testing**: Jest
 
 ---
 
@@ -157,10 +165,11 @@ US-003 (Listado productos)
 ├─ US-010 (Deshabilitar botón)
 └─ US-011 (Stock automático)
 
-### Estadísticas
+### Detalle de Producto
 
-US-012 (@defer history)
-└─ US-013 (Endpoint estadísticas avanzadas)
+US-003 (Listado productos)
+└─ US-012 (Detalle producto)
+└─ US-013 (Estadísticas producto)
 
 ### UI
 
@@ -177,15 +186,15 @@ US-003 (Listado productos)
 2. **Servicios API**: Verificar en inventory-service
 3. **Componentes**: Revisar en components/ para reutilizar
 4. **Signals**: Usar signal(), computed(), effect()
-5. **@defer**: Para carga diferida
+5. **CSS vanilla**: Sin frameworks UI
 
 ### Patrones de Implementación
 
 - **Standalone**: Todos los componentes son standalone
 - **Signals**: signal() para estado, computed() para derivados, effect() para side effects
-- **@defer**: on interaction para historial, on viewport para estadísticas
 - **lazy loading**: loadComponent para rutas
-- **localStorage**: effect() para persistencia
+- **localStorage**: effect() para persistencia (key: inventory-filters)
+- **Modal**: MovementForm como modal desde ProductList
 
 ---
 
@@ -198,11 +207,14 @@ ng serve
 # Build
 ng build
 
-# Test
-ng test
+# Test (Jest)
+npm test
 
 # Test coverage
-ng test --coverage
+npm run test:coverage
+
+# Test watch
+npm run test:watch
 ```
 
 ---

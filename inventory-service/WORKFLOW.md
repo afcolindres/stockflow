@@ -82,15 +82,16 @@ src/main/java/com/stockflow/
 ├── controller/              # Controladores REST
 ├── service/                # Lógica de negocio
 ├── repository/             # Repositorios JPA
-├── model/                  # Entidades
+├── entity/                  # Entidades JPA
 ├── dto/                    # DTOs
-├── exception/              # Excepciones
+├── exception/              # Excepciones personalizadas
 └── config/                 # Configuración
 ```
 
 ### Stack Técnico
 
-- **Backend**: Spring Boot 3.5+
+- **Backend**: Spring Boot 3.5.0
+- **Java**: 17
 - **ORM**: Spring Data JPA
 - **Base de datos**: H2
 - **Resilience**: Resilience4j
@@ -100,8 +101,9 @@ src/main/java/com/stockflow/
 
 - **Controladores**: PascalCase (ej: `ProductController`)
 - **Servicios**: PascalCase (ej: `ProductService`)
-- **DTOs**: PascalCase con sufijo DTO (ej: `ProductRequestDto`)
+- **DTOs**: PascalCase con sufijo Dto (ej: `ProductRequestDto`)
 - **Entidades**: PascalCase (ej: `Product`)
+- **Enums**: PascalCase (ej: `MovementType`, `AlertSeverity`)
 
 ---
 
@@ -153,7 +155,7 @@ Products → Movements → Alerts
 
 ### Revisar Antes de Implementar
 
-1. **Entidades existentes**: Verificar en `com.stockflow.model`
+1. **Entidades existentes**: Verificar en `com.stockflow.entity`
 2. **Servicios API**: Verificar en `com.stockflow.service`
 3. **DTOs**: Revisar en carpeta `dto/`
 4. **Compilar**: Usar `mvn compile` después de cambios

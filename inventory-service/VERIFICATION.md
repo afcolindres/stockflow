@@ -45,31 +45,17 @@ src/test/java/com/stockflow/
 ├── repository/
 │   ├── ProductRepositoryTest.java
 │   └── MovementRepositoryTest.java
-└── integration/
-    └── InventoryServiceIntegrationTest.java
+└── config/
+    └── InventoryHealthIndicatorTest.java
 ```
 
 ---
 
 ## 2. Tipos de Tests
 
-### 2.1 Tests Unitarios
+### 2.1 Tests Unitarios (Service)
 
 ```java
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
@@ -80,70 +66,54 @@ class ProductServiceTest {
     private ProductService productService;
 
     @Test
-    void shouldFindAllProducts() {
-        // Arrange
-        Product product = new Product();
-        product.setId(1L);
-        product.setSku("SKU-001");
-        product.setName("Laptop");
-        product.setCategory("Electronica");
-        product.setCurrentStock(10);
-        product.setMinStock(5);
-        product.setUnitPrice(BigDecimal.valueOf(999.99));
+    void findAll_ReturnsPagedProducts() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Product> page = new PageImpl<>(List.of(product), pageable, 1);
+        when(productRepository.findAll(pageable)).thenReturn(page);
 
-        when(productRepository.findAll()).thenReturn(Arrays.asList(product));
+        PageResponseDto<ProductResponseDto> result = productService.findAll(0, 10, null);
 
-        // Act
-        List<Product> result = productService.findAll();
-
-        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("SKU-001", result.get(0).getSku());
+        assertEquals(1, result.getTotalElements());
     }
 
     @Test
-    void shouldFindProductById() {
-        // Arrange
+    void findById_ExistingProduct_ReturnsProduct() {
         Product product = new Product();
         product.setId(1L);
-        product.setSku("SKU-001");
-
+        product.setSku("ELEC-001");
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        // Act
-        Product result = productService.findById(1L);
+        ProductResponseDto result = productService.findById(1L);
 
-        // Assert
         assertNotNull(result);
-        assertEquals("SKU-001", result.getSku());
+        assertEquals("ELEC-001", result.getSku());
     }
 
     @Test
-    void shouldCreateProduct() {
-        // Arrange
-        ProductRequestDto dto = new ProductRequestDto();
-        dto.setSku("SKU-002");
-        dto.setName("Mouse");
-        dto.setCategory("Accesorios");
-        dto.setCurrentStock(20);
-        dto.setMinStock(10);
-        dto.setUnitPrice(BigDecimal.valueOf(29.99));
+    void findById_NonExistingProduct_ThrowsException() {
+        when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
-        Product savedProduct = new Product();
-        savedProduct.setId(2L);
-        savedProduct.setSku(dto.getSku());
-        savedProduct.setName(dto.getName());
+        assertThrows(ProductNotFoundException.class, () -> productService.findById(999L));
+    }
 
-        when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+    @Test
+    void findAllCategories_ReturnsCategoryList() {
+        when(productRepository.findAllCategories()).thenReturn(List.of("Electrónica", "Hogar"));
 
-        // Act
-        Product result = productService.create(dto);
+        List<String> result = productService.findAllCategories();
 
-        // Assert
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void search_ReturnsMatchingProducts() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(productRepository.searchByQuery("laptop", pageable)).thenReturn(List.of(product));
+
+        List<ProductResponseDto> result = productService.search("laptop", 10);
+
         assertNotNull(result);
-        assertEquals("SKU-002", result.getSku());
-        verify(productRepository, times(1)).save(any(Product.class));
     }
 }
 ```
@@ -151,64 +121,80 @@ class ProductServiceTest {
 ### 2.2 Tests de Controlador
 
 ```java
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.math.BigDecimal;
-import java.util.Arrays;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(ProductController.class)
+@ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private ProductService productService;
 
-    @Test
-    void shouldGetAllProducts() throws Exception {
-        Product product = new Product();
-        product.setId(1L);
-        product.setSku("SKU-001");
-        product.setName("Laptop");
+    @Mock
+    private MovementService movementService;
 
-        when(productService.findAll()).thenReturn(Arrays.asList(product));
+    @InjectMocks
+    private ProductController productController;
 
-        mockMvc.perform(get("/api/v1/products"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].sku").value("SKU-001"));
-
-        verify(productService, times(1)).findAll();
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(productController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     @Test
-    void shouldGetProductById() throws Exception {
-        Product product = new Product();
-        product.setId(1L);
-        product.setSku("SKU-001");
+    void getProducts_ReturnsProductList() throws Exception {
+        ProductResponseDto product = new ProductResponseDto(1L, "ELEC-001", "Laptop", "Electrónica", 10, 5, new BigDecimal("1299.99"));
+        PageResponseDto<ProductResponseDto> pageResponse = new PageResponseDto<>(List.of(product), 1, 0, 0, 10);
+        when(productService.findAll(anyInt(), anyInt(), any())).thenReturn(pageResponse);
 
-        when(productService.findById(1L)).thenReturn(product);
+        mockMvc.perform(get("/api/v1/products"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getProductById_ExistingProduct_ReturnsProduct() throws Exception {
+        when(productService.findById(1L)).thenReturn(productResponseDto);
 
         mockMvc.perform(get("/api/v1/products/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.sku").value("SKU-001"));
+                .andExpect(jsonPath("$.data.id").value(1));
     }
 
     @Test
-    void shouldReturn404WhenProductNotFound() throws Exception {
-        when(productService.findById(999L)).thenReturn(null);
+    void getProductById_NonExistingProduct_Returns404() throws Exception {
+        when(productService.findById(999L)).thenThrow(new ProductNotFoundException(999L));
 
         mockMvc.perform(get("/api/v1/products/999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCategories_ReturnsCategoryList() throws Exception {
+        when(productService.findAllCategories()).thenReturn(List.of("Electrónica"));
+
+        mockMvc.perform(get("/api/v1/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray());
+    }
+
+    @Test
+    void searchProducts_ReturnsMatchingProducts() throws Exception {
+        when(productService.search(anyString(), anyInt())).thenReturn(List.of(productResponseDto));
+
+        mockMvc.perform(get("/api/v1/products/search").param("q", "laptop"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray());
+    }
+
+    @Test
+    void getProductStats_ReturnsStats() throws Exception {
+        ProductStatsResponseDto stats = new ProductStatsResponseDto(1L, "Laptop", 5L, 3L, 2L, 1.5, LocalDateTime.now());
+        when(movementService.getStats(1L)).thenReturn(stats);
+
+        mockMvc.perform(get("/api/v1/products/1/stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalMovements").value(5));
     }
 }
 ```
@@ -224,14 +210,15 @@ mvn test
 # Ejecutar un test específico
 mvn test -Dtest=ProductServiceTest
 
-# Ejecutar tests con coverage
-mvn test -Dcoverage
+# Ejecutar tests de controller
+mvn test -Dtest="*ControllerTest"
 
-# Ejecutar tests unitarios solo
-mvn test -Dtest="*Test"
+# Ejecutar tests de service
+mvn test -Dtest="*ServiceTest"
 
-# Ejecutar tests de integración
-mvn test -Dtest="*IntegrationTest"
+# Ejecutar tests con coverage (JaCoCo)
+mvn test
+mvn jacoco:report
 ```
 
 ---
@@ -309,20 +296,6 @@ void setUp() {
 ## 7. Ejemplo Completo: MovementServiceTest
 
 ```java
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class MovementServiceTest {
 
@@ -336,8 +309,7 @@ class MovementServiceTest {
     private MovementService movementService;
 
     @Test
-    void shouldRegisterMovementIn() {
-        // Arrange
+    void registerMovement_In_IncreasesStock() {
         Product product = new Product();
         product.setId(1L);
         product.setCurrentStock(10);
@@ -347,23 +319,18 @@ class MovementServiceTest {
         dto.setProductId(1L);
         dto.setType(MovementType.IN);
         dto.setQuantity(5);
-        dto.setReason("Compra");
 
-        when(productRepository.findById(1L())).thenReturn(Optional.of(product));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(movementRepository.save(any(Movement.class))).thenAnswer(i -> i.getArgument(0));
 
-        // Act
-        Movement result = movementService.registerMovement(dto);
+        MovementResponseDto result = movementService.registerMovement(dto);
 
-        // Assert
         assertNotNull(result);
         assertEquals(15, product.getCurrentStock());
-        verify(movementRepository).save(any(Movement.class));
     }
 
     @Test
-    void shouldRegisterMovementOut() {
-        // Arrange
+    void registerMovement_Out_DecreasesStock() {
         Product product = new Product();
         product.setId(1L);
         product.setCurrentStock(10);
@@ -373,22 +340,18 @@ class MovementServiceTest {
         dto.setProductId(1L);
         dto.setType(MovementType.OUT);
         dto.setQuantity(3);
-        dto.setReason("Venta");
 
-        when(productRepository.findById(1L())).thenReturn(Optional.of(product));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(movementRepository.save(any(Movement.class))).thenAnswer(i -> i.getArgument(0));
 
-        // Act
-        Movement result = movementService.registerMovement(dto);
+        MovementResponseDto result = movementService.registerMovement(dto);
 
-        // Assert
         assertNotNull(result);
         assertEquals(7, product.getCurrentStock());
     }
 
     @Test
-    void shouldThrowInsufficientStockException() {
-        // Arrange
+    void registerMovement_Out_InsufficientStock_ThrowsException() {
         Product product = new Product();
         product.setId(1L);
         product.setCurrentStock(2);
@@ -398,14 +361,34 @@ class MovementServiceTest {
         dto.setProductId(1L);
         dto.setType(MovementType.OUT);
         dto.setQuantity(10);
-        dto.setReason("Venta");
 
-        when(productRepository.findById(1L())).thenReturn(Optional.of(product));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        // Act & Assert
-        assertThrows(InsufficientStockException.class, () -> {
-            movementService.registerMovement(dto);
-        });
+        assertThrows(InsufficientStockException.class, () -> movementService.registerMovement(dto));
+    }
+
+    @Test
+    void getHistory_ReturnsPagedMovements() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(movementRepository.findByProductIdOrderByTimestampDesc(1L, pageable))
+                .thenReturn(new PageImpl<>(List.of(movement), pageable, 1));
+
+        PageResponseDto<MovementResponseDto> result = movementService.getHistory(1L, pageable);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void getStats_ReturnsProductStatistics() {
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(movementRepository.findByProductIdOrderByTimestampDesc(eq(1L), any()))
+                .thenReturn(new PageImpl<>(movements, PageRequest.of(0, 10), 2));
+
+        ProductStatsResponseDto result = movementService.getStats(1L);
+
+        assertNotNull(result);
+        assertEquals(5L, result.getTotalMovements());
     }
 }
 ```
@@ -427,7 +410,6 @@ class InventoryServiceIntegrationTest {
 
     @Test
     void shouldRegisterMovementAndUpdateStock() throws Exception {
-        // Create product first
         Product product = new Product();
         product.setSku("SKU-TEST");
         product.setName("Test Product");
@@ -437,7 +419,6 @@ class InventoryServiceIntegrationTest {
         product.setUnitPrice(BigDecimal.valueOf(100));
         productRepository.save(product);
 
-        // Register movement
         String json = """
             {
                 "productId": 1,
@@ -452,9 +433,70 @@ class InventoryServiceIntegrationTest {
                         .content(json))
                 .andExpect(status().isOk());
 
-        // Verify stock updated
         Product updated = productRepository.findById(1L).orElse(null);
         assertEquals(7, updated.getCurrentStock());
+    }
+}
+```
+
+## 8.1 Tests de AlertService
+
+```java
+@ExtendWith(MockitoExtension.class)
+class AlertServiceTest {
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @InjectMocks
+    private AlertService alertService;
+
+    @Test
+    void getAlerts_ReturnsProductsBelowMinStock() {
+        Product product = new Product();
+        product.setId(1L);
+        product.setName("Test Product");
+        product.setCurrentStock(3);
+        product.setMinStock(5);
+
+        when(productRepository.findAll()).thenReturn(List.of(product));
+
+        List<StockAlertResponseDto> result = alertService.getAlerts();
+
+        assertEquals(1, result.size());
+        assertEquals(AlertSeverity.LOW, result.get(0).getSeverity());
+    }
+
+    @Test
+    void getAlerts_CriticalStock_ReturnsCriticalSeverity() {
+        Product product = new Product();
+        product.setId(1L);
+        product.setName("Test Product");
+        product.setCurrentStock(1);
+        product.setMinStock(5);
+
+        when(productRepository.findAll()).thenReturn(List.of(product));
+
+        List<StockAlertResponseDto> result = alertService.getAlerts();
+
+        assertEquals(AlertSeverity.CRITICAL, result.get(0).getSeverity());
+    }
+
+    @Test
+    void countCriticalAlerts_ReturnsCorrectCount() {
+        Product p1 = new Product();
+        p1.setCurrentStock(1);
+        p1.setMinStock(5);
+
+        Product p2 = new Product();
+        p2.setCurrentStock(3);
+        p2.setMinStock(5);
+
+        when(productRepository.findAll()).thenReturn(List.of(p1, p2));
+
+        long count = alertService.countCriticalAlerts();
+
+        assertEquals(1, count);
     }
 }
 ```

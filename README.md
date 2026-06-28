@@ -41,6 +41,14 @@ API REST para gestión de inventario de productos con frontend Angular. Permite 
   - `minimum-idle: 5` - Mantener conexiones activas para evitar overhead
   - `connection-timeout: 30000` - 30 segundos para obtener conexión
   - `idle-timeout: 600000` - 10 minutos para cerrar conexiones inactivas
+- **Formato de respuestas API**: Se mantienen dos formatos de respuesta diferentes:
+  - **Éxito (200/201)**: `{ statusCode, message, data }` - Formato limpio optimizado para el frontend
+  - **Error (4xx/5xx)**: `{ timestamp, status, error, message, path }` - Formato ErrorResponse estándar de Spring
+  - **Justificación**:
+    - Los errores se manejan centralizadamente con `@RestControllerAdvice` para seguir el estándar de Spring
+    - Las respuestas exitosas usan formato optimizado para consumo eficiente del frontend
+    - Esta separación es una práctica recomendada en APIs REST modernas: errores estructurados vs respuestas de éxito optimizadas
+    - El frontend maneja ambos formatos correctamente a través del interceptor HTTP
 
 ### Frontend
 - **@defer**: Carga diferida del historial de movimientos en nueva página de detalle del producto para mejorar rendimiento.

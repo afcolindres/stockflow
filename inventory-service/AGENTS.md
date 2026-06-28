@@ -138,13 +138,16 @@ src/test/java/com/stockflow/
 
 ## Endpoints REST
 
-| Endpoint                                | Método | Descripción                              |
-| --------------------------------------- | ------ | ---------------------------------------- |
-| `/api/v1/products`                      | GET    | Listar productos con paginación y filtro |
-| `/api/v1/products/{id}`                 | GET    | Obtener producto por ID                  |
-| `/api/v1/movements`                     | POST   | Registrar movimiento                     |
-| `/api/v1/alerts`                        | GET    | Listar alertas                           |
-| `/api/v1/movements/{productId}/history` | GET    | Historial de movimientos                 |
+| Endpoint                              | Método | Descripción                                  |
+| -------------------------------------| ------ | -------------------------------------------- |
+| `/api/v1/products`                    | GET    | Listar productos con paginación y filtro     |
+| `/api/v1/products/{id}`               | GET    | Obtener producto por ID                     |
+| `/api/v1/categories`                  | GET    | Listar todas las categorías disponibles      |
+| `/api/v1/products/search`             | GET    | Buscar productos por texto                   |
+| `/api/v1/products/{id}/stats`         | GET    | Obtener estadísticas avanzadas de producto   |
+| `/api/v1/movements`                   | POST   | Registrar movimiento de inventario          |
+| `/api/v1/movements/{productId}/history`| GET    | Historial de movimientos de producto        |
+| `/api/v1/alerts`                      | GET    | Listar alertas de stock                     |
 
 ---
 
@@ -263,17 +266,17 @@ public OpenAPI customOpenAPI() {
 
 ## Estructura de Respuestas
 
-Todos los endpoints deben devolver una estructura estandarizada mediante `IDataResponse`.
+Todos los endpoints deben devolver una estructura estandarizada mediante `ApiResponseWrapper`.
 
-### Interfaz IDataResponse
+### Clase ApiResponseWrapper
 
 ```java
-public class ApiResponse<T> {
+public class ApiResponseWrapper<T> {
     private int statusCode;
     private String message;
     private T data;
 
-    public ApiResponse(int statusCode, String message, T data) {
+    public ApiResponseWrapper(int statusCode, String message, T data) {
         this.statusCode = statusCode;
         this.message = message;
         this.data = data;
@@ -308,21 +311,21 @@ public class ApiResponse<T> {
 
 ```java
 @GetMapping("/products")
-public ApiResponse<List<ProductResponseDto>> getProducts(...) {
-    List<ProductResponseDto> products = productService.findAll(page, size, category);
-    return new ApiResponse<>(200, "Obtención satisfactoria", products);
+public ApiResponseWrapper<PageResponseDto<ProductResponseDto>> getProducts(...) {
+    PageResponseDto<ProductResponseDto> products = productService.findAll(page, size, category);
+    return new ApiResponseWrapper<>(200, "Obtención satisfactoria", products);
 }
 
 @GetMapping("/products/{id}")
-public ApiResponse<ProductResponseDto> getProductById(@PathVariable Long id) {
+public ApiResponseWrapper<ProductResponseDto> getProductById(@PathVariable Long id) {
     ProductResponseDto product = productService.findById(id);
-    return new ApiResponse<>(200, "Obtención satisfactoria", product);
+    return new ApiResponseWrapper<>(200, "Obtención satisfactoria", product);
 }
 
-@PostMapping("/products")
-public ApiResponse<ProductResponseDto> createProduct(@Valid @RequestBody ProductRequestDto request) {
-    ProductResponseDto product = productService.create(request);
-    return new ApiResponse<>(201, "Registro exitoso", product);
+@PostMapping("/movements")
+public ApiResponseWrapper<MovementResponseDto> createMovement(@Valid @RequestBody MovementRequestDto request) {
+    MovementResponseDto movement = movementService.registerMovement(request);
+    return new ApiResponseWrapper<>(201, "Movimiento registrado exitosamente", movement);
 }
 ```
 
@@ -333,23 +336,23 @@ public ApiResponse<ProductResponseDto> createProduct(@Valid @RequestBody Product
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProductNotFoundException.class)
-    public ApiResponse<Object> handleProductNotFound(ProductNotFoundException ex) {
-        return new ApiResponse<>(404, ex.getMessage(), Collections.emptyList());
+    public ApiResponseWrapper<Object> handleProductNotFound(ProductNotFoundException ex) {
+        return new ApiResponseWrapper<>(404, ex.getMessage(), Collections.emptyList());
     }
 
     @ExceptionHandler(InsufficientStockException.class)
-    public ApiResponse<Object> handleInsufficientStock(InsufficientStockException ex) {
-        return new ApiResponse<>(422, ex.getMessage(), Collections.emptyList());
+    public ApiResponseWrapper<Object> handleInsufficientStock(InsufficientStockException ex) {
+        return new ApiResponseWrapper<>(422, ex.getMessage(), Collections.emptyList());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ApiResponse<Object> handleValidation(MethodArgumentNotValidException ex) {
-        return new ApiResponse<>(400, ex.getBindingResult().getFieldError().getDefaultMessage(), Collections.emptyList());
+    public ApiResponseWrapper<Object> handleValidation(MethodArgumentNotValidException ex) {
+        return new ApiResponseWrapper<>(400, ex.getBindingResult().getFieldError().getDefaultMessage(), Collections.emptyList());
     }
 
     @ExceptionHandler(Exception.class)
-    public ApiResponse<Object> handleGeneral(Exception ex) {
-        return new ApiResponse<>(500, "Error interno del servidor", Collections.emptyList());
+    public ApiResponseWrapper<Object> handleGeneral(Exception ex) {
+        return new ApiResponseWrapper<>(500, "Error interno del servidor", Collections.emptyList());
     }
 }
 ```

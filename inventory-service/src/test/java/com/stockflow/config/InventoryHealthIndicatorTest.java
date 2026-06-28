@@ -28,17 +28,18 @@ class InventoryHealthIndicatorTest {
 
     @Test
     void health_WithNoAlerts_ReturnsUp() {
-        when(alertService.countTotalAlerts()).thenReturn(0L);
+        when(alertService.countTotalProducts()).thenReturn(0L);
 
         Health health = healthIndicator.health();
 
         assertNotNull(health);
         assertEquals(Status.UP, health.getStatus());
-        assertEquals("No hay alertas de stock", health.getDetails().get("message"));
+        assertEquals("No hay productos registrados", health.getDetails().get("message"));
     }
 
     @Test
     void health_WithLowCriticalPercentage_ReturnsUp() {
+        when(alertService.countTotalProducts()).thenReturn(100L);
         when(alertService.countTotalAlerts()).thenReturn(10L);
         when(alertService.countCriticalAlerts()).thenReturn(1L);
 
@@ -50,6 +51,7 @@ class InventoryHealthIndicatorTest {
 
     @Test
     void health_WithHighCriticalPercentage_ReturnsDown() {
+        when(alertService.countTotalProducts()).thenReturn(10L);
         when(alertService.countTotalAlerts()).thenReturn(10L);
         when(alertService.countCriticalAlerts()).thenReturn(5L);
 
@@ -62,6 +64,7 @@ class InventoryHealthIndicatorTest {
 
     @Test
     void health_AtThreshold_ReturnsUp() {
+        when(alertService.countTotalProducts()).thenReturn(100L);
         when(alertService.countTotalAlerts()).thenReturn(10L);
         when(alertService.countCriticalAlerts()).thenReturn(2L);
 

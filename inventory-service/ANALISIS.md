@@ -4,19 +4,20 @@
 
 ### Requisitos Funcionales
 
-- **Gestión de Productos**: CRUD completo con paginación y filtro por categoría
-- **Registro de Movimientos**: Entradas y salidas de inventario
+- **Gestión de Productos**: Listado con paginación, filtro por categoría, búsqueda por texto
+- **Gestión de Categorías**: Listado de todas las categorías disponibles
+- **Registro de Movimientos**: Entradas (IN) y salidas (OUT) de inventario
 - **Actualización Automática de Stock**: Al registrar movimiento
-- **Generación de Alertas**: Stock bajo y crítico
-- **Historial de Movimientos**: Consulta por producto
-- **Dashboard**: KPIs de inventario
+- **Generación de Alertas**: Stock bajo y crítico (con severidad)
+- **Historial de Movimientos**: Consulta paginada por producto
+- **Estadísticas de Producto**: Total movimientos, entradas, salidas, promedio mensual
 
 ### Requisitos No Funcionales
 
 - **Rendimiento**: Tiempo de respuesta aceptable
-- **Tolerancia a fallos**: Resilience4j
+- **Tolerancia a fallos**: Resilience4j (Circuit Breaker, Retry, Rate Limiter)
 - **Documentación**: OpenAPI / Swagger
-- **Monitoreo**: Spring Actuator
+- **Monitoreo**: Spring Actuator con Health Indicator personalizado
 
 ---
 
@@ -52,12 +53,12 @@
 
 ### Componentes Principales
 
-- **ProductController**: Endpoints de productos
-- **MovementController**: Endpoints de movimientos
+- **ProductController**: Endpoints de productos (listado, búsqueda, categorías, estadísticas)
+- **MovementController**: Endpoints de movimientos (registro, historial)
 - **AlertController**: Endpoints de alertas
-- **ProductService**: Lógica de productos
-- **MovementService**: Lógica de movimientos
-- **AlertService**: Lógica de alertas
+- **ProductService**: Lógica de productos (findAll, findById, findAllCategories, search)
+- **MovementService**: Lógica de movimientos (registerMovement, getHistory, getStats)
+- **AlertService**: Lógica de alertas (getAlerts, countCriticalAlerts, countTotalAlerts)
 - **ProductRepository**: Acceso a datos de productos
 - **MovementRepository**: Acceso a datos de movimientos
 
@@ -166,20 +167,15 @@ public enum AlertSeverity {
      "reason": "Venta"
    }
 
-2. MovementService.validaStock(productId, quantity, type OUT)
-   - Verifica que haya stock suficiente
-
-3. MovementService.registrarMovimiento()
-   - Crea registro en tabla Movement
+2. MovementService.registerMovement()
+   - Valida stock disponible (para tipo OUT)
    - Actualiza currentStock en Product
+   - Verifica si hay alerta (stock <= minStock)
+   - Crea registro en tabla Movement
 
-4. AlertService.verificarAlertas()
-   - Consulta productos con currentStock <= minStock
-   - Genera StockAlert con severity
-
-5. Respuesta al cliente
-   - Movement registrado
-   - Lista de alertas activas
+3. Respuesta al cliente
+   - MovementResponseDto con datos del movimiento
+   - Alerta incluida si stock bajo (en campo alert)
 ```
 
 ---
@@ -201,11 +197,13 @@ public enum AlertSeverity {
 
 ## 7. Métricas de Éxito
 
-- CRUD completo funcionando
-- Tiempo respuesta < 3 segundos
-- Circuit Breaker funcionando
-- Retry funcionando
-- Rate Limiter funcionando
+- Endpoints de productos funcionando (listado, búsqueda, categorías, estadísticas)
+- Endpoint de registro de movimientos funcionando
+- Endpoint de historial de movimientos funcionando
+- Endpoint de alertas funcionando
+- Circuit Breaker en alertas (fallback)
+- Retry en movimientos
+- Rate Limiter en historial
 - Health Indicator personalizado funcionando
 
 ---
@@ -264,6 +262,47 @@ public class MovementRequestDto {
     private Integer quantity;
 
     private String reason;
+}
+```
+
+### MovementResponseDto
+
+```java
+public class MovementResponseDto {
+    private Long id;
+    private Long productId;
+    private String productName;
+    private MovementType type;
+    private Integer quantity;
+    private String reason;
+    private LocalDateTime timestamp;
+    private StockAlertResponseDto alert;  // Alerta incluida si stock bajo
+}
+```
+
+### StockAlertResponseDto
+
+```java
+public class StockAlertResponseDto {
+    private Long productId;
+    private String productName;
+    private Integer currentStock;
+    private Integer minStock;
+    private AlertSeverity severity;  // LOW o CRITICAL
+}
+```
+
+### ProductStatsResponseDto
+
+```java
+public class ProductStatsResponseDto {
+    private Long productId;
+    private String productName;
+    private Long totalMovements;
+    private Long totalIn;
+    private Long totalOut;
+    private Double averagePerMonth;
+    private LocalDateTime lastMovement;
 }
 ```
 

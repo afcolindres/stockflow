@@ -2,21 +2,21 @@
 
 ## Historial de US
 
-| US     | Título                                         | Complejidad | Estado     | Dependencias           | Notes                                                              |
-| ------ | ---------------------------------------------- | ----------- | ---------- | ---------------------- | ------------------------------------------------------------------ |
-| US-001 | Configurar Signals para estado global          | 2           | Completado | -                      | Base del estado global con signals                                 |
-| US-002 | Interceptor HTTP para errores                  | 1           | Completado | -                      | Manejo centralizado de errores                                     |
-| US-003 | Listado de productos con filtros y paginación  | 2           | Completado | US-001                 | Tabla con datos del API                                            |
-| US-004 | Skeleton loaders durante peticiones            | 1           | Completado | US-003                 | UI de carga                                                        |
-| US-005 | Panel de alertas con severidad visual          | 2           | Completado | US-001                 | Lista de alertas del API                                           |
-| US-006 | Badge de estado de stock en tiempo real        | 1           | Completado | US-003                 | Columna en grid productos - Backend provee currentStock y minStock |
-| US-007 | Dashboard con KPIs derivados de signals        | 2           | Completado | US-001, US-003, US-005 | Requiere datos de productos y alertas                              |
-| US-008 | Persistencia de filtros en localStorage        | 1           | Completado | US-001                 | effect() para persistencia                                         |
-| US-009 | Registro de movimiento con formulario reactivo | 2           | Completado | US-003                 | Modal desde grid productos + POST /api/v1/movements                |
-| US-010 | Deshabilitar botón durante petición            | 1           | Pendiente  | US-009                 | Botón "Registrar" del modal (US-009)                               |
-| US-011 | Actualización de stock automática              | 2           | Pendiente  | US-009                 | Después de registrar - actualiza signals                           |
-| US-012 | Carga diferida de historial con @defer         | 2           | Completado | -                      | Página de detalle con @defer (on viewport/interaction)                         |
-| US-013 | Endpoint de estadísticas avanzadas        | 2           | Completado | US-012                 | Nuevo endpoint GET /products/{id}/stats - elimina cálculo en frontend          |
+| US     | Título                                         | Complejidad | Estado     | Dependencias           | Notes                                                                 |
+| ------ | ---------------------------------------------- | ----------- | ---------- | ---------------------- | --------------------------------------------------------------------- |
+| US-001 | Configurar Signals para estado global          | 2           | Completado | -                      | Base del estado global con signals                                    |
+| US-002 | Interceptor HTTP para errores                  | 1           | Completado | -                      | Manejo centralizado de errores                                        |
+| US-003 | Listado de productos con filtros y paginación  | 2           | Completado | US-001                 | Tabla con datos del API                                               |
+| US-004 | Skeleton loaders durante peticiones            | 1           | Completado | US-003                 | UI de carga                                                           |
+| US-005 | Panel de alertas con severidad visual          | 2           | Completado | US-001                 | Lista de alertas del API                                              |
+| US-006 | Badge de estado de stock en tiempo real        | 1           | Completado | US-003                 | Columna en grid productos - Backend provee currentStock y minStock    |
+| US-007 | Dashboard con KPIs derivados de signals        | 2           | Completado | US-001, US-003, US-005 | Requiere datos de productos y alertas                                 |
+| US-008 | Persistencia de filtros en localStorage        | 1           | Completado | US-001                 | effect() para persistencia                                            |
+| US-009 | Registro de movimiento con formulario reactivo | 2           | Completado | US-003                 | Modal desde grid productos + POST /api/v1/movements                   |
+| US-010 | Deshabilitar botón durante petición            | 1           | Completado | US-009                 | Botón "Registrar" del modal (US-009)                                  |
+| US-011 | Actualización de stock automática              | 2           | Completado | US-009                 | Después de registrar - actualiza signals                              |
+| US-012 | Carga diferida de historial con @defer         | 2           | Completado | -                      | Página de detalle con @defer (on viewport/interaction)                |
+| US-013 | Endpoint de estadísticas avanzadas             | 2           | Completado | US-012                 | Nuevo endpoint GET /products/{id}/stats - elimina cálculo en frontend |
 
 ---
 

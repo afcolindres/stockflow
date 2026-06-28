@@ -78,4 +78,8 @@ public class AlertService {
                 .filter(p -> p.getCurrentStock() <= p.getMinStock())
                 .count();
     }
+
+    public long countTotalProducts() {
+        return productRepository.count();
+    }
 }

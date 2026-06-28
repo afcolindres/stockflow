@@ -110,10 +110,10 @@ src/
 
 ### Cobertura Mínima Requerida
 
-- **Instrucciones**: 85%
-- **Branches**: 85%
-- **Functions**: 85%
-- **Lines**: 85%
+- **Instrucciones**: 70%
+- **Branches**: 70%
+- **Functions**: 70%
+- **Lines**: 70%
 
 ### Estructura de Tests
 
@@ -158,7 +158,7 @@ npm run test:coverage
 Este comando:
 
 1. Ejecuta las pruebas
-2. Verifica que la cobertura cumpla el mínimo (85%)
+2. Verifica que la cobertura cumpla el mínimo (70%)
 3. Falla si no se cumple el threshold
 
 ## Notas

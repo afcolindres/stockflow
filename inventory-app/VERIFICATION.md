@@ -1,6 +1,6 @@
-# VERIFICATION.md - Verificación con Jest/Jasmine
+# VERIFICATION.md - Verificación con Jest
 
-Esta guía proporciona instrucciones para crear tests automatizados con **Jest** o **Jasmine/Karma** para Angular.
+Esta guía proporciona instrucciones para crear tests automatizados con **Jest** para Angular.
 
 ---
 
@@ -20,48 +20,47 @@ npx prettier --write src/**/*.spec.ts
 
 ### 1.1 Requisitos
 
-- **Angular**: 16+
+- **Angular**: 17
 - **Node.js**: Versión 18+
-- **Jest** o **Jasmine/Karma** (incluidos en Angular)
+- **Jest** (configurado en el proyecto)
 
 ### 1.2 Instalación
 
-Angular ya incluye Jasmine/Karma por defecto. Para usar Jest:
+El proyecto ya tiene Jest configurado. Para verificar:
 
 ```bash
-npm install --save-dev jest @types/jest jest-preset-angular
+npm install
 ```
 
 ### 1.3 Configuración
 
-En `angular.json` (Jasmine/Karma):
+En `package.json`:
 
 ```json
 {
-  "test": {
-    "karmaConfig": "karma.conf.js",
-    "polyfills": ["zone.js", "zone.js/testing"]
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "jest-preset-angular": "^14.2.4",
+    "@types/jest": "^29.5.0"
   }
 }
 ```
 
-En `jest.config.js` (Jest):
-
-```javascript
-module.exports = {
-  preset: "jest-preset-angular",
-  setupFilesAfterEnv: ["<rootDir>/setup-jest.ts"],
-  testPathIgnorePatterns: ["<rootDir>/node_modules/"],
-  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.spec.ts"],
-  coverageThreshold: {
-    global: {
-      branches: 70,
-      functions: 70,
-      lines: 70,
-      statements: 70,
-    },
-  },
-};
+Jest usa configuración en `jest.config.js` o en `package.json`:
+```json
+{
+  "jest": {
+    "preset": "jest-preset-angular",
+    "setupFilesAfterEnv": ["<rootDir>/setup-jest.ts"],
+    "testPathIgnorePatterns": ["<rootDir>/node_modules/"],
+    "collectCoverageFrom": ["src/**/*.ts", "!src/**/*.spec.ts"]
+  }
+}
 ```
 
 ---
@@ -72,7 +71,7 @@ module.exports = {
 
 1. **El programador indica** qué Historia de Usuario (US) requiere pruebas
 2. **El agente genera** los tests correspondientes en archivos `.spec.ts`
-3. **Se ejecutan** con `ng test`
+3. **Se ejecutan** con `npm test`
 
 ### 2.2 Formato de Solicitud
 
@@ -87,33 +86,7 @@ Tests requeridos:
 
 ## 3. Estructura de un Test
 
-### 3.1 Plantilla Base (Jasmine)
-
-```typescript
-import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { DashboardComponent } from "./dashboard.component";
-
-describe("DashboardComponent", () => {
-  let component: DashboardComponent;
-  let fixture: ComponentFixture<DashboardComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [DashboardComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(DashboardComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it("should create", () => {
-    expect(component).toBeTruthy();
-  });
-});
-```
-
-### 3.2 Plantilla Base (Jest)
+### 3.1 Plantilla Base (Jest)
 
 ```typescript
 import { ComponentFixture, TestBed } from "@angular/core/testing";
@@ -187,17 +160,14 @@ it("should compute total value correctly", () => {
 });
 ```
 
-### 4.4 Test de @defer
+### 4.4 Test de Carga de Datos
 
 ```typescript
-it("should load history on interaction", (done) => {
+it("should load history on init", async () => {
   component.productId = 1;
-  component.onProductClick();
+  await component.loadHistory();
 
-  setTimeout(() => {
-    expect(component.historyLoaded).toBe(true);
-    done();
-  }, 100);
+  expect(component.history.length).toBeGreaterThan(0);
 });
 ```
 
@@ -237,23 +207,23 @@ it("should handle error response", () => {
 
 ```bash
 # Ejecutar todos los tests
-ng test
+npm test
 
 # Ejecutar test específico
-ng test --include="src/app/components/dashboard/**/*.spec.ts"
+npm test -- --testPathPattern="dashboard"
 
 # Ejecutar con coverage
-ng test --coverage
+npm run test:coverage
 
-# Ejecutar con Jest
-npm test
+# Ejecutar en modo watch
+npm run test:watch
 ```
 
 ### 5.2 Coverage
 
 ```bash
 # Coverage mínimo requerido: 70%
-ng test --coverage --code-coverage
+npm run test:coverage
 ```
 
 ---
@@ -273,8 +243,8 @@ ng test --coverage --code-coverage
 | US-009 | Registro de movimiento con formulario reactivo | [ ]           | [ ]       | Pendiente |
 | US-010 | Deshabilitar botón durante petición      | [ ]           | [ ]       | Pendiente |
 | US-011 | Actualización de stock automática      | [ ]           | [ ]       | Pendiente |
-| US-012 | Carga diferida de historial con @defer   | [ ]           | [ ]       | Pendiente |
-| US-013 | Endpoint de estadísticas avanzadas     | [ ]           | [ ]       | Pendiente |
+| US-012 | Detalle de producto con historial        | [ ]           | [ ]       | Pendiente |
+| US-013 | Endpoint de estadísticas de producto     | [ ]           | [ ]       | Pendiente |
 
 ---
 
@@ -292,26 +262,21 @@ ng test --coverage --code-coverage
 - [ ] Badge de estado con colores correctos
 - [ ] Toast de errores visible
 - [ ] Botón deshabilitado durante petición
+- [ ] Modal de movimiento se abre/cierra correctamente
+- [ ] Navbar de navegación visible
 
 ### 7.3 Signals
 
 - [ ] KPIs se actualizan automáticamente
-- [ ] Effect persiste filtros en localStorage
+- [ ] Effect persiste filtros en localStorage (key: inventory-filters)
 - [ ] Effect muestra toast de alertas
 
-### 7.4 @defer
-
-- [ ] Historial carga on interaction
-- [ ] @placeholder muestra skeleton
-- [ ] @loading muestra spinner
-- [ ] @error muestra mensaje
-
-### 7.5 Console (F12)
+### 7.4 Console (F12)
 
 - [ ] Sin errores rojos
 - [ ] Sin warnings de Angular
 
-### 7.6 Responsividad
+### 7.5 Responsividad
 
 - [ ] Vista móvil funciona
 - [ ] Tabla scrollable en móvil
@@ -341,6 +306,7 @@ ng test --coverage --code-coverage
 
 - `/dashboard` - Dashboard con KPIs
 - `/products` - Listado de productos (grid con botones para modal de movimiento)
+- `/products/:id` - Detalle de producto con historial
 - `/alerts` - Panel de alertas
 
 ### Endpoints Consumidos
@@ -348,18 +314,22 @@ ng test --coverage --code-coverage
 | Método | Endpoint                              | Descripción                       |
 | ------ | ------------------------------------- | --------------------------------- |
 | GET    | /api/v1/products                      | Lista de productos con paginación |
+| GET    | /api/v1/products/{id}               | Detalle de producto              |
+| GET    | /api/v1/products/search              | Buscar productos por nombre       |
+| GET    | /api/v1/products/{id}/stats           | Estadísticas de producto        |
 | GET    | /api/v1/alerts                        | Lista de alertas de stock         |
 | POST   | /api/v1/movements                     | Registrar movimiento              |
 | GET    | /api/v1/movements/{productId}/history | Historial de movimientos          |
+| GET    | /api/v1/categories                   | Lista de categorías           |
 
 ### Selectores Comunes del Proyecto
 
-- `.total-products` - Total de productos
-- `.total-alerts` - Total de alertas
-- `.total-value` - Valor total
-- `.stock-badge` - Badge de estado
+- `.kpi-card` - KPIs del dashboard
+- `.stock-badge` - Badge de estado (stock-ok, stock-low, stock-critical)
 - `.product-table` - Tabla de productos
-- `.movement-form` - Formulario de movimiento
+- `.skeleton-loader` - Loader esqueleto
+- `.toast` - Notificaciones
+- `.modal` - Modal de movimiento
 
 ### Convenciones de Interfaces
 
@@ -383,13 +353,23 @@ Los tests deben usar selectores `data-test-id` para mayor estabilidad y mantenib
 
 // Product List
 '[data-test-id="product-list-table"]';
-'[data-test-id="product-list-filter-category"]';
-'[data-test-id="product-list-paginator"]';
+'[data-test-id="filter-category"]';
+'[data-test-id="filter-paginator"]';
+'[data-test-id="btn-open-movement-form"]';
 '[data-test-id="product-row-ELEC-001"]';
 '[data-test-id="product-stock-badge-ELEC-001"]';
+'[data-test-id="product-btn-detail-ELEC-001"]';
+
+// Pagination
+'[data-test-id="paginator-prev"]';
+'[data-test-id="paginator-next"]';
+
+// Product Detail
+'[data-test-id="product-detail-container"]';
 
 // Alerts Panel
 '[data-test-id="alerts-panel-list"]';
+'[data-test-id="alerts-panel-container"]';
 '[data-test-id="alert-item-ELEC-001"]';
 '[data-test-id="alert-severity-ELEC-001"]';
 
@@ -400,12 +380,12 @@ Los tests deben usar selectores `data-test-id` para mayor estabilidad y mantenib
 '[data-test-id="movement-form-quantity"]';
 '[data-test-id="movement-form-reason"]';
 '[data-test-id="movement-form-submit"]';
+'[data-test-id="movement-form-cancel"]';
 
 // Navigation
 '[data-test-id="nav-dashboard"]';
 '[data-test-id="nav-products"]';
 '[data-test-id="nav-alerts"]';
-'[data-test-id="nav-movements"]';
 ```
 
 ### Ejemplo de Test con data-test-id

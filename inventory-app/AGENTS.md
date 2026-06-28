@@ -15,30 +15,28 @@
 
 ## Rol del Agente
 
-Eres un **Especialista en Angular 16+ con Signals y Standalone Components**. Tu rol es crear una SPA Angular que consuma el API REST de inventory-service y presente el dashboard de monitoreo de inventario.
+Eres un **Especialista en Angular 17 con Signals y Standalone Components**. Tu rol es crear una SPA Angular que consuma el API REST de inventory-service y presente el dashboard de monitoreo de inventario.
 
 ## Especialización
 
-- Angular 16+ (Standalone Components)
+- Angular 17 (Standalone Components)
 - Signals: signal(), computed(), effect()
-- @defer para vistas diferidas
 - Router con lazy loading
 - HttpClient con interceptores
-- Angular Material (componentes UI)
+- CSS vanilla (sin frameworks UI)
 - Reactive Forms
 
 ## Comportamiento
 
 - Usar Standalone Components exclusivamente
 - Aplicar Signals para estado reactivo global
-- Implementar @defer para carga diferida
 - Usar inject() para inyección de dependencias
 - Manejar errores con interceptor HTTP
 - Persistir filtros en localStorage
 
 ## Limitaciones
 
-- Usar Angular 16+ estrictamente
+- Usar Angular 17 estrictamente
 - Usar Standalone Components (NO NgModules)
 - NO usar NgModules de feature
 - Usar Signals para estado global
@@ -109,7 +107,7 @@ Si necesitas modificar 3 o más archivos para estandarizar código, debes pedir 
 
 ## Testing
 
-- **Framework**: Jest o Jasmine/Karma
+- **Framework**: Jest
 - **Mocks**: Angular TestBed
 - **Cobertura mínima**: 70%
 
@@ -139,8 +137,8 @@ src/app/
 | -------------------------- | ----------------------------------------------------- |
 | **Dashboard**              | KPI cards: total productos, alertas, valor inventario |
 | **Listado de Productos**   | Tabla con filtros, paginación, badges de estado       |
+| **Detalle de Producto**    | Ver producto + historial de movimientos               |
 | **Panel de Alertas**       | Productos con stock bajo/crítico                      |
-| **Registro de Movimiento** | Formulario reactivo para entradas/salidas             |
 
 ---
 
@@ -151,21 +149,37 @@ src/app/
 ```typescript
 @Injectable({ providedIn: "root" })
 export class InventoryStore {
-  private products = signal<IProduct[]>([]);
-  private alerts = signal<IStockAlert[]>([]);
-  private selectedProduct = signal<IProduct | null>(null);
-  private loading = signal<boolean>(false);
-  private error = signal<string | null>(null);
+  private readonly products = signal<IProduct[]>([]);
+  private readonly alerts = signal<IStockAlert[]>([]);
+  private readonly selectedProduct = signal<IProduct | null>(null);
+  private readonly loading = signal<boolean>(false);
+  private readonly error = signal<string | null>(null);
+
+  private readonly filters = signal<FilterState>({
+    category: "",
+    page: 0,
+    size: 10,
+  });
+
+  private readonly pagination = signal({ totalPages: 0, totalElements: 0 });
+  private readonly categories = signal<string[]>([]);
 
   readonly products$ = this.products.asReadonly();
   readonly alerts$ = this.alerts.asReadonly();
   readonly selectedProduct$ = this.selectedProduct.asReadonly();
   readonly loading$ = this.loading.asReadonly();
   readonly error$ = this.error.asReadonly();
+  readonly filters$ = this.filters.asReadonly();
+  readonly pagination$ = this.pagination.asReadonly();
+  readonly categories$ = this.categories.asReadonly();
 
-  readonly totalProducts = computed(() => this.products().length);
+  readonly totalProducts = computed(() => this.pagination().totalElements);
+  readonly activeAlerts = computed(() => this.alerts().length);
   readonly criticalAlerts = computed(
     () => this.alerts().filter((a) => a.severity === "CRITICAL").length,
+  );
+  readonly totalStock = computed(() =>
+    this.products().reduce((sum, p) => sum + p.currentStock, 0),
   );
   readonly totalValue = computed(() =>
     this.products().reduce((sum, p) => sum + p.currentStock * p.unitPrice, 0),
@@ -173,48 +187,32 @@ export class InventoryStore {
 
   constructor() {
     effect(() => {
-      localStorage.setItem("filters", JSON.stringify(this.filters()));
+      const currentFilters = this.filters();
+      localStorage.setItem("inventory-filters", JSON.stringify(currentFilters));
     });
 
     effect(() => {
       const alerts = this.alerts();
       if (alerts.length > 0) {
-        this.toastService.show(`${alerts.length} alertas activas`);
+        this.toastService.show(`${alerts.length} alertas activas`, "info");
       }
     });
+
+    this.loadFiltersFromStorage();
   }
-}
-```
 
----
+  setFilters(filters: Partial<FilterState>): void {
+    this.filters.update((current) => ({ ...current, ...filters }));
+  }
 
-## @defer para Vistas Diferidas
-
-### Historial de Movimientos (on interaction)
-
-```html
-@defer (on interaction(productCard)) {
-<app-movement-history [productId]="product.id" />
-} @placeholder {
-<app-skeleton-loader />
-} @loading {
-<app-spinner />
-} @error {
-<app-error-message />
-}
-```
-
-### Estadísticas Avanzadas (on viewport)
-
-```html
-@defer (on viewport) {
-<app-advanced-stats [data]="products()" />
-} @placeholder {
-<app-skeleton-loader />
-} @loading {
-<app-spinner />
-} @error {
-<app-error-message />
+  async loadProducts(): Promise<void> { /* ... */ }
+  async loadAlerts(): Promise<void> { /* ... */ }
+  async loadCategories(): Promise<void> { /* ... */ }
+  async createMovement(request: IMovementRequest): Promise<boolean> { /* ... */ }
+  async searchProducts(query: string, limit?: number): Promise<IProduct[]> { /* ... */ }
+  async getMovementHistory(productId: number, page?: number, size?: number): Promise<any> { /* ... */ }
+  async getProductById(id: number): Promise<IProduct | null> { /* ... */ }
+  async getProductStats(productId: number): Promise<IProductStats | null> { /* ... */ }
 }
 ```
 
@@ -228,9 +226,12 @@ export class InventoryStore {
 | --------------------------------------- | ------ | ---------------------------------------- |
 | `/api/v1/products`                      | GET    | Listar productos con paginación y filtro |
 | `/api/v1/products/{id}`                 | GET    | Obtener detalle de un producto           |
+| `/api/v1/products/search`              | GET    | Buscar productos por nombre              |
+| `/api/v1/products/{id}/stats`           | GET    | Obtener estadísticas de producto        |
 | `/api/v1/movements`                     | POST   | Registrar movimiento                     |
-| `/api/v1/alerts`                        | GET    | Listar alertas de stock                  |
 | `/api/v1/movements/{productId}/history` | GET    | Historial de movimientos por producto    |
+| `/api/v1/alerts`                        | GET    | Listar alertas de stock                  |
+| `/api/v1/categories`                    | GET    | Listar categorías disponibles           |
 
 ### Estructura de Respuesta API
 
@@ -275,11 +276,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
 1. **Standalone Components**: Todos los componentes deben ser standalone
 2. **Signals**: Usar signal(), computed(), effect() para estado reactivo
-3. **@defer**: Aplicar para historial y estadísticas avanzadas
-4. **lazy loading**: Usar loadComponent para rutas
-5. **inject()**: Usar en al menos 3 servicios
-6. **localStorage**: Persistir filtros activos
-7. **Toast**: Mostrar notificación al cambiar alertas
+3. **lazy loading**: Usar loadComponent para rutas
+4. **inject()**: Usar en al menos 3 servicios
+5. **localStorage**: Persistir filtros activos
+6. **Toast**: Mostrar notificación al cambiar alertas
 
 ---
 
@@ -290,6 +290,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 - Indicador visual de severidad por color
 - Botón deshabilitado durante petición en vuelo
 - Formulario reactivo con validaciones
+- Botón "+ Registrar Movimiento" para abrir modal de movimientos
 
 ---
 
@@ -314,12 +315,17 @@ Todos los componentes deben incluir el atributo `data-test-id` para facilitar la
 
 <!-- Product List -->
 <table data-test-id="product-list-table"></table>
-<button data-test-id="product-list-filter-category"></button>
-<mat-paginator data-test-id="product-list-paginator"></mat-paginator>
+<select data-test-id="filter-category"></select>
+<button data-test-id="btn-open-movement-form">+ Registrar Movimiento</button>
 
 <!-- Product Row -->
 <tr data-test-id="product-row-ELEC-001"></tr>
 <span data-test-id="product-stock-badge-ELEC-001"></span>
+<button data-test-id="product-btn-detail-ELEC-001">👁</button>
+
+<!-- Pagination -->
+<button data-test-id="paginator-prev">Anterior</button>
+<button data-test-id="paginator-next">Siguiente</button>
 
 <!-- Alerts Panel -->
 <div data-test-id="alerts-panel-list"></div>
@@ -328,8 +334,8 @@ Todos los componentes deben incluir el atributo `data-test-id` para facilitar la
 
 <!-- Movement Form -->
 <form data-test-id="movement-form"></form>
-<mat-select data-test-id="movement-form-product"></mat-select>
-<mat-select data-test-id="movement-form-type"></mat-select>
+<select data-test-id="movement-form-product"></select>
+<select data-test-id="movement-form-type"></select>
 <input data-test-id="movement-form-quantity"></input>
 <input data-test-id="movement-form-reason"></input>
 <button data-test-id="movement-form-submit"></button>
@@ -339,7 +345,6 @@ Todos los componentes deben incluir el atributo `data-test-id` para facilitar la
 <a data-test-id="nav-dashboard" routerLink="/dashboard"></a>
 <a data-test-id="nav-products" routerLink="/products"></a>
 <a data-test-id="nav-alerts" routerLink="/alerts"></a>
-<a data-test-id="nav-movements" routerLink="/movements"></a>
 ```
 
 ### Lista de data-test-id por Componente
@@ -353,8 +358,9 @@ Todos los componentes deben incluir el atributo `data-test-id` para facilitar la
 | KPI Valor Inventario   | `dashboard-total-value`                |
 | ProductListComponent  | `product-list-container`               |
 | Tabla Productos       | `product-list-table`                   |
-| Filtro Categoría      | `product-list-filter-category`       |
-| Paginador            | `product-list-paginator`             |
+| Filtro Categoría      | `filter-category`                     |
+| Paginador            | `filter-paginator`                   |
+| Botón Movement      | `btn-open-movement-form`               |
 | AlertsPanelComponent | `alerts-panel-container`              |
 | Lista de Alertas     | `alerts-panel-list`                   |
 | MovementFormComponent| `movement-form-container`            |
